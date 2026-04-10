@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="plugin/screen-diff/styles.css">
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -38,6 +39,10 @@
   .failed .status, .status_failed { color: #f85149 !important; }
   .broken .status, .status_broken { color: #d29922 !important; }
   .skipped .status, .status_skipped { color: #8b949e !important; }
+  .side-nav__item:has(a[href="#suites"]),
+  .side-nav__item:has(a[href="#categories"]),
+  .side-nav__item:has(a[href="#graph"]),
+  .side-nav__item:has(a[href="#timeline"]),
   .side-nav__item:has(a[href="#behaviors"]),
   .side-nav__item:has(a[href="#packages"]) { display: none !important; }
 </style>
