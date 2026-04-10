@@ -12,6 +12,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -68,6 +69,32 @@
   .side-nav__item:has(a[href="#behaviors"]),
   .side-nav__item:has(a[href="#packages"]) { display: none !important; }
 </style>
+<script id="qa-broken-red">
+(function() {
+  var BROKEN_RED = '#f85149';
+  var BROKEN_YELLOW = ['#ffd050', '#FFD050', 'ffd050'];
+
+  function fixBrokenColor() {
+    document.querySelectorAll('.chart__fill_status_broken').forEach(function(el) {
+      el.setAttribute('fill', BROKEN_RED);
+      el.style.fill = BROKEN_RED;
+    });
+    document.querySelectorAll('path[fill], circle[fill], rect[fill], polygon[fill]').forEach(function(el) {
+      var f = el.getAttribute('fill') || '';
+      if (BROKEN_YELLOW.some(function(y){ return f.toLowerCase().includes(y.toLowerCase()); })) {
+        el.setAttribute('fill', BROKEN_RED);
+      }
+    });
+    document.querySelectorAll('.chart__legend-icon_status_broken').forEach(function(el) {
+      el.style.background = BROKEN_RED;
+      el.style.backgroundColor = BROKEN_RED;
+    });
+  }
+
+  setInterval(fixBrokenColor, 700);
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixBrokenColor, 1000); });
+})();
+</script>
 </head>
 <body>
     <div id="alert"></div>
