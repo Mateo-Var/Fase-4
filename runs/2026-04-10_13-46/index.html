@@ -40,6 +40,7 @@
 })();
 </script>
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -93,7 +94,13 @@
   .status-details_status_failed  { background: #1f0000 !important; border-color: #f85149 !important; }
   .alert_status_broken  { background: #2a1c00 !important; color: #ffd050 !important; }
   .alert_status_failed  { background: #2d0a0a !important; color: #f85149 !important; }
-  .table__row_active    { background: #1c2128 !important; }
+  /* Selección / hover en Suites y tablas */
+  .table__row_active                          { background: #1c2128 !important; }
+  .node__title_active, .node__title_active:before { background: #1c2128 !important; }
+  .node__title:hover, .node__title:hover:before   { background: #21262d !important; }
+  .step__title:hover, .step__title:hover:before   { background: #21262d !important; }
+  .button_active                              { background: #30363d !important; }
+  .tab_active > a, .tab_active > a:hover      { border-bottom-color: #58a6ff !important; }
   .island               { background: #161b22 !important; border-color: #30363d !important; }
   .attachment__text-container_fullscreen,
   .attachment__iframe_fullscreen { background: #0d1117 !important; }
