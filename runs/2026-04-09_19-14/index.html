@@ -10,6 +10,33 @@
 
 
 
+<script id="qa-widget-hider">
+(function() {
+  var HIDDEN_TITLES = [
+    'categorías','categorias','categories','kategorien','catégories','categorie',
+    'ejecutores','executors','ausführer','exécuteurs',
+    'tendencia','tendências','trend','tendance','tendenza',
+    'tendencia de categorías','categories trend','history trend'
+  ];
+  function hideWidgets() {
+    var titles = document.querySelectorAll('.widget__title');
+    titles.forEach(function(el) {
+      var txt = (el.textContent || '').trim().toLowerCase();
+      if (HIDDEN_TITLES.some(function(h){ return txt.indexOf(h) !== -1; })) {
+        var widget = el.closest('.widget, .widgets-grid__col');
+        if (widget) widget.style.display = 'none';
+      }
+    });
+  }
+  var lastHash = '';
+  setInterval(function() {
+    if (location.hash !== lastHash) { lastHash = location.hash; setTimeout(hideWidgets, 400); }
+    hideWidgets();
+  }, 600);
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(hideWidgets, 800); });
+})();
+</script>
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -44,11 +71,12 @@
   .status-line { background: #161b22 !important; }
   .tag, .badge { background: #1c2128 !important; color: #8b949e !important; }
   a { color: #58a6ff !important; }
-  /* Estados de tests */
+  /* Estados de tests — broken también en rojo */
   .passed .status, .status_passed { color: #3fb950 !important; }
-  .failed .status, .status_failed { color: #f85149 !important; }
-  .broken .status, .status_broken { color: #d29922 !important; }
+  .failed .status, .status_failed,
+  .broken .status, .status_broken { color: #f85149 !important; }
   .skipped .status, .status_skipped { color: #8b949e !important; }
+  .chart__fill_broken, [class*="broken"] .chart__fill { fill: #f85149 !important; }
   .side-nav__item:has(a[href="#suites"]),
   .side-nav__item:has(a[href="#categories"]),
   .side-nav__item:has(a[href="#graph"]),
@@ -64,22 +92,58 @@
     'tendencia','tendências','trend','tendance','tendenza',
     'tendencia de categorías','categories trend','history trend'
   ];
+
   function hideWidgets() {
-    var titles = document.querySelectorAll('.widget__title');
-    titles.forEach(function(el) {
+    document.querySelectorAll('.widget__title').forEach(function(el) {
       var txt = (el.textContent || '').trim().toLowerCase();
       if (HIDDEN_TITLES.some(function(h){ return txt.indexOf(h) !== -1; })) {
-        var widget = el.closest('.widget, .widgets-grid__col');
-        if (widget) widget.style.display = 'none';
+        var w = el.closest('.widget, .widgets-grid__col');
+        if (w) w.style.display = 'none';
       }
     });
   }
+
+  function showFailedPanel() {
+    if (document.getElementById('qa-failed-panel')) return;
+    var grid = document.querySelector('.widgets-grid');
+    if (!grid) return;
+
+    fetch('data/suites.json')
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var failed = [];
+        function traverse(node) {
+          if (node.status === 'failed' || node.status === 'broken') failed.push(node.name);
+          if (node.children) node.children.forEach(traverse);
+        }
+        if (data.children) data.children.forEach(traverse);
+        if (failed.length === 0) return;
+
+        var panel = document.createElement('div');
+        panel.id = 'qa-failed-panel';
+        panel.style.cssText = 'background:#2d0a0a;border:2px solid #f85149;border-radius:10px;padding:18px 22px;margin:0 0 20px 0;grid-column:1/-1';
+        panel.innerHTML =
+          '<div style="color:#f85149;font-weight:700;font-size:16px;margin-bottom:12px;letter-spacing:.02em">✖ ' +
+          failed.length + ' test' + (failed.length > 1 ? 's' : '') + ' fallaron</div>' +
+          failed.map(function(n){
+            return '<div style="color:#ffa0a0;font-size:13px;padding:5px 0;border-top:1px solid #4a1515">• ' + n + '</div>';
+          }).join('');
+        grid.insertBefore(panel, grid.firstChild);
+      })
+      .catch(function(){});
+  }
+
   var lastHash = '';
   setInterval(function() {
-    if (location.hash !== lastHash) { lastHash = location.hash; setTimeout(hideWidgets, 400); }
+    if (location.hash !== lastHash) {
+      lastHash = location.hash;
+      setTimeout(function(){ hideWidgets(); showFailedPanel(); }, 500);
+    }
     hideWidgets();
   }, 600);
-  document.addEventListener('DOMContentLoaded', function() { setTimeout(hideWidgets, 800); });
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function(){ hideWidgets(); showFailedPanel(); }, 900);
+  });
 })();
 </script>
 </head>
