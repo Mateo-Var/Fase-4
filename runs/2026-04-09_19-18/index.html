@@ -13,6 +13,33 @@
 
 
 
+<script id="qa-broken-red">
+(function() {
+  var BROKEN_RED = '#f85149';
+  var BROKEN_YELLOW = ['#ffd050', '#FFD050', 'ffd050'];
+
+  function fixBrokenColor() {
+    document.querySelectorAll('.chart__fill_status_broken').forEach(function(el) {
+      el.setAttribute('fill', BROKEN_RED);
+      el.style.fill = BROKEN_RED;
+    });
+    document.querySelectorAll('path[fill], circle[fill], rect[fill], polygon[fill]').forEach(function(el) {
+      var f = el.getAttribute('fill') || '';
+      if (BROKEN_YELLOW.some(function(y){ return f.toLowerCase().includes(y.toLowerCase()); })) {
+        el.setAttribute('fill', BROKEN_RED);
+      }
+    });
+    document.querySelectorAll('.chart__legend-icon_status_broken').forEach(function(el) {
+      el.style.background = BROKEN_RED;
+      el.style.backgroundColor = BROKEN_RED;
+    });
+  }
+
+  setInterval(fixBrokenColor, 700);
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixBrokenColor, 1000); });
+})();
+</script>
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -56,12 +83,20 @@
   .failed .status, .status_failed { color: #f85149 !important; }
   .broken .status, .status_broken { color: #8b949e !important; }
   .skipped .status, .status_skipped { color: #8b949e !important; }
-  /* Broken → rojo en gráficas, barras, labels y suites (reemplaza amarillo) */
-  .chart__fill_status_broken   { fill: #f85149 !important; }
-  .bar__fill_status_broken     { fill: #f85149 !important; }
-  .chart__legend-icon_status_broken { background: #f85149 !important; }
-  .label_status_broken, .n-label_status_broken, .y-label_status_broken,
-  .text_status_broken, .message_status_broken, .alert_status_broken { color: #f85149 !important; }
+  /* Broken → rojo en gráficas, barras, labels */
+  .chart__fill_status_broken { fill: #f85149 !important; }
+  .bar__fill_status_broken, .label_status_broken,
+  .chart__legend-icon_status_broken, .y-label_status_broken { background: #f85149 !important; }
+  .text_status_broken, .n-label_status_broken { color: #f85149 !important; }
+  /* Fondos claros en mensajes de error / detalle de test */
+  .status-details_status_broken  { background: #1f1500 !important; border-color: #f85149 !important; }
+  .status-details_status_failed  { background: #1f0000 !important; border-color: #f85149 !important; }
+  .alert_status_broken  { background: #2a1c00 !important; color: #ffd050 !important; }
+  .alert_status_failed  { background: #2d0a0a !important; color: #f85149 !important; }
+  .table__row_active    { background: #1c2128 !important; }
+  .island               { background: #161b22 !important; border-color: #30363d !important; }
+  .attachment__text-container_fullscreen,
+  .attachment__iframe_fullscreen { background: #0d1117 !important; }
   .side-nav__item:has(a[href="#suites"]),
   .side-nav__item:has(a[href="#categories"]),
   .side-nav__item:has(a[href="#graph"]),
@@ -69,32 +104,6 @@
   .side-nav__item:has(a[href="#behaviors"]),
   .side-nav__item:has(a[href="#packages"]) { display: none !important; }
 </style>
-<script id="qa-broken-red">
-(function() {
-  var BROKEN_RED = '#f85149';
-  var BROKEN_YELLOW = ['#ffd050', '#FFD050', 'ffd050'];
-
-  function fixBrokenColor() {
-    document.querySelectorAll('.chart__fill_status_broken').forEach(function(el) {
-      el.setAttribute('fill', BROKEN_RED);
-      el.style.fill = BROKEN_RED;
-    });
-    document.querySelectorAll('path[fill], circle[fill], rect[fill], polygon[fill]').forEach(function(el) {
-      var f = el.getAttribute('fill') || '';
-      if (BROKEN_YELLOW.some(function(y){ return f.toLowerCase().includes(y.toLowerCase()); })) {
-        el.setAttribute('fill', BROKEN_RED);
-      }
-    });
-    document.querySelectorAll('.chart__legend-icon_status_broken').forEach(function(el) {
-      el.style.background = BROKEN_RED;
-      el.style.backgroundColor = BROKEN_RED;
-    });
-  }
-
-  setInterval(fixBrokenColor, 700);
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixBrokenColor, 1000); });
-})();
-</script>
 </head>
 <body>
     <div id="alert"></div>
