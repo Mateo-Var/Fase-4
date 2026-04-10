@@ -100,58 +100,6 @@
 })();
 </script>
 
-<style id="qa-dark-override">
-  :root { color-scheme: dark; }
-  body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
-  /* Texto general — sobreescribe #000 y #333 hardcodeados en styles.css */
-  .link { color: #58a6ff !important; }
-  .table__row { color: #e6edf3 !important; }
-  .tree__info { color: #e6edf3 !important; }
-  .node { color: #e6edf3 !important; }
-  .sorter_enabled { color: #e6edf3 !important; }
-  .pane__subtitle { color: #8b949e !important; }
-  .splash__subtitle { color: #8b949e !important; }
-  .popover { background: #161b22 !important; color: #e6edf3 !important; border-color: #30363d !important; }
-  .hljs { background: #1c2128 !important; color: #e6edf3 !important; }
-  /* Navegación lateral */
-  .side-nav, .side-nav__list { background: #161b22 !important; border-color: #30363d !important; }
-  .side-nav__item a, .side-nav__item span { color: #8b949e !important; }
-  .side-nav__item.active a { color: #58a6ff !important; background: #1c2128 !important; }
-  /* Widgets y cards */
-  .widget, .card, .summary, .chart-widget { background: #161b22 !important; border-color: #30363d !important; }
-  .widget__title, .card__title { color: #8b949e !important; }
-  .y-axis text, .x-axis text, .label { fill: #8b949e !important; }
-  /* Header */
-  .header { background: #161b22 !important; border-bottom: 1px solid #30363d !important; }
-  .header__name { color: #e6edf3 !important; }
-  /* Tabs */
-  .tab, .tabs__tab { color: #8b949e !important; background: #161b22 !important; }
-  .tab.active, .tabs__tab_active { color: #58a6ff !important; border-color: #58a6ff !important; }
-  /* Tablas */
-  .table__row, tr { border-color: #21262d !important; }
-  .table__row:hover, tr:hover { background: #1c2128 !important; }
-  /* Misc */
-  .status-line { background: #161b22 !important; }
-  .tag, .badge { background: #1c2128 !important; color: #8b949e !important; }
-  a { color: #58a6ff !important; }
-  /* Estados de tests */
-  .passed .status, .status_passed { color: #3fb950 !important; }
-  .failed .status, .status_failed { color: #f85149 !important; }
-  .broken .status, .status_broken { color: #8b949e !important; }
-  .skipped .status, .status_skipped { color: #8b949e !important; }
-  /* Broken → rojo en gráficas, barras, labels y suites (reemplaza amarillo) */
-  .chart__fill_status_broken   { fill: #f85149 !important; }
-  .bar__fill_status_broken     { fill: #f85149 !important; }
-  .chart__legend-icon_status_broken { background: #f85149 !important; }
-  .label_status_broken, .n-label_status_broken, .y-label_status_broken,
-  .text_status_broken, .message_status_broken, .alert_status_broken { color: #f85149 !important; }
-  .side-nav__item:has(a[href="#suites"]),
-  .side-nav__item:has(a[href="#categories"]),
-  .side-nav__item:has(a[href="#graph"]),
-  .side-nav__item:has(a[href="#timeline"]),
-  .side-nav__item:has(a[href="#behaviors"]),
-  .side-nav__item:has(a[href="#packages"]) { display: none !important; }
-</style>
 <script id="qa-widget-hider">
 (function() {
   var HIDDEN_TITLES = [
@@ -229,6 +177,59 @@
   });
 })();
 </script>
+
+<style id="qa-dark-override">
+  :root { color-scheme: dark; }
+  body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
+  /* Texto general — sobreescribe #000 y #333 hardcodeados en styles.css */
+  .link { color: #58a6ff !important; }
+  .table__row { color: #e6edf3 !important; }
+  .tree__info { color: #e6edf3 !important; }
+  .node { color: #e6edf3 !important; }
+  .sorter_enabled { color: #e6edf3 !important; }
+  .pane__subtitle { color: #8b949e !important; }
+  .splash__subtitle { color: #8b949e !important; }
+  .popover { background: #161b22 !important; color: #e6edf3 !important; border-color: #30363d !important; }
+  .hljs { background: #1c2128 !important; color: #e6edf3 !important; }
+  /* Navegación lateral */
+  .side-nav, .side-nav__list { background: #161b22 !important; border-color: #30363d !important; }
+  .side-nav__item a, .side-nav__item span { color: #8b949e !important; }
+  .side-nav__item.active a { color: #58a6ff !important; background: #1c2128 !important; }
+  /* Widgets y cards */
+  .widget, .card, .summary, .chart-widget { background: #161b22 !important; border-color: #30363d !important; }
+  .widget__title, .card__title { color: #8b949e !important; }
+  .y-axis text, .x-axis text, .label { fill: #8b949e !important; }
+  /* Header */
+  .header { background: #161b22 !important; border-bottom: 1px solid #30363d !important; }
+  .header__name { color: #e6edf3 !important; }
+  /* Tabs */
+  .tab, .tabs__tab { color: #8b949e !important; background: #161b22 !important; }
+  .tab.active, .tabs__tab_active { color: #58a6ff !important; border-color: #58a6ff !important; }
+  /* Tablas */
+  .table__row, tr { border-color: #21262d !important; }
+  .table__row:hover, tr:hover { background: #1c2128 !important; }
+  /* Misc */
+  .status-line { background: #161b22 !important; }
+  .tag, .badge { background: #1c2128 !important; color: #8b949e !important; }
+  a { color: #58a6ff !important; }
+  /* Estados de tests */
+  .passed .status, .status_passed { color: #3fb950 !important; }
+  .failed .status, .status_failed { color: #f85149 !important; }
+  .broken .status, .status_broken { color: #8b949e !important; }
+  .skipped .status, .status_skipped { color: #8b949e !important; }
+  /* Broken → rojo en gráficas, barras, labels y suites (reemplaza amarillo) */
+  .chart__fill_status_broken   { fill: #f85149 !important; }
+  .bar__fill_status_broken     { fill: #f85149 !important; }
+  .chart__legend-icon_status_broken { background: #f85149 !important; }
+  .label_status_broken, .n-label_status_broken, .y-label_status_broken,
+  .text_status_broken, .message_status_broken, .alert_status_broken { color: #f85149 !important; }
+  .side-nav__item:has(a[href="#suites"]),
+  .side-nav__item:has(a[href="#categories"]),
+  .side-nav__item:has(a[href="#graph"]),
+  .side-nav__item:has(a[href="#timeline"]),
+  .side-nav__item:has(a[href="#behaviors"]),
+  .side-nav__item:has(a[href="#packages"]) { display: none !important; }
+</style>
 </head>
 <body>
     <div id="alert"></div>
