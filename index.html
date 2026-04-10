@@ -3,27 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fase 4 — Reportes QA</title>
+  <title>Fase 4 — QA Reports</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
-    header { background: #161b22; border-bottom: 1px solid #30363d; padding: 24px 40px; display: flex; align-items: center; gap: 16px; }
-    header h1 { font-size: 20px; font-weight: 600; }
-    header .subtitle { color: #8b949e; font-size: 14px; }
-    .logo { width: 36px; height: 36px; background: #238636; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    main { max-width: 960px; margin: 40px auto; padding: 0 24px; }
-    h2 { font-size: 16px; color: #8b949e; margin-bottom: 16px; text-transform: uppercase; letter-spacing: .05em; }
+    header { background: #161b22; border-bottom: 1px solid #30363d; padding: 20px 40px; display: flex; align-items: center; gap: 14px; }
+    .logo { font-size: 22px; }
+    header h1 { font-size: 18px; font-weight: 600; }
+    header p { color: #8b949e; font-size: 13px; margin-top: 2px; }
+    main { max-width: 860px; margin: 36px auto; padding: 0 24px; }
+    h2 { font-size: 12px; color: #8b949e; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .08em; }
     table { width: 100%; border-collapse: collapse; background: #161b22; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }
-    th { background: #1c2128; color: #8b949e; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 12px 16px; text-align: left; }
-    td { padding: 14px 16px; border-top: 1px solid #21262d; font-size: 14px; }
+    th { background: #1c2128; color: #8b949e; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 10px 16px; text-align: left; }
+    td { padding: 13px 16px; border-top: 1px solid #21262d; font-size: 14px; vertical-align: middle; }
+    tr:hover td { background: #1c2128; }
+    .latest-row td:first-child { border-left: 2px solid #238636; }
     td a { color: #58a6ff; text-decoration: none; }
     td a:hover { text-decoration: underline; }
-    .badge { background: #1f6feb; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; font-weight: 600; }
-    .pass { background: #1a3f1e; color: #3fb950; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
-    .fail { background: #3d1a1a; color: #f85149; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
-    .btn { background: #21262d; color: #e6edf3 !important; padding: 6px 14px; border-radius: 6px; font-size: 13px; border: 1px solid #30363d; text-decoration: none !important; }
+    .latest { background: #238636; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; letter-spacing: .04em; }
+    .pass { color: #3fb950; font-size: 13px; font-weight: 500; }
+    .fail { color: #f85149; font-size: 13px; font-weight: 500; }
+    .btn { background: #21262d; color: #e6edf3 !important; padding: 5px 12px; border-radius: 6px; font-size: 13px; border: 1px solid #30363d; text-decoration: none !important; white-space: nowrap; }
     .btn:hover { background: #30363d; }
-    .empty { text-align: center; color: #8b949e; padding: 40px; }
   </style>
 </head>
 <body>
@@ -31,42 +32,51 @@
     <div class="logo">🧪</div>
     <div>
       <h1>Fase 4 — Automatización QA</h1>
-      <div class="subtitle">Historial de reportes de pruebas E2E — Azteca Live</div>
+      <p>Azteca Live · Android · E2E</p>
     </div>
   </header>
   <main>
-    <h2>Corridas (3)</h2>
+    <h2>Corridas (4)</h2>
     <table>
       <thead>
         <tr>
           <th>Fecha / Hora</th>
-          <th>Total</th>
-          <th>Pasaron</th>
-          <th>Estado</th>
+          <th>Resultado</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
         
+      <tr class="latest-row">
+        <td>
+          <span class="latest">LATEST</span> 
+          <a href="https://mateo-var.github.io/Fase-4/runs/2026-04-10_13-46/">2026-04-10 13-46</a>
+        </td>
+        <td><span class="pass">✓ 19/20 pasaron</span></td>
+        <td><a href="https://mateo-var.github.io/Fase-4/runs/2026-04-10_13-46/" class="btn">Ver reporte →</a></td>
+      </tr>
       <tr>
-        <td><a href="https://mateo-var.github.io/Fase-4/runs/2026-04-10_13-40/">2026-04-10 13-40</a> <span class="badge">latest</span></td>
-        <td>20</td>
-        <td>19</td>
-        <td><span class="pass">all pass</span></td>
+        <td>
+          
+          <a href="https://mateo-var.github.io/Fase-4/runs/2026-04-10_13-40/">2026-04-10 13-40</a>
+        </td>
+        <td><span class="pass">✓ 19/20 pasaron</span></td>
         <td><a href="https://mateo-var.github.io/Fase-4/runs/2026-04-10_13-40/" class="btn">Ver reporte →</a></td>
       </tr>
       <tr>
-        <td><a href="https://mateo-var.github.io/Fase-4/runs/2026-04-09_19-18/">2026-04-09 19-18</a></td>
-        <td>20</td>
-        <td>19</td>
-        <td><span class="pass">all pass</span></td>
+        <td>
+          
+          <a href="https://mateo-var.github.io/Fase-4/runs/2026-04-09_19-18/">2026-04-09 19-18</a>
+        </td>
+        <td><span class="pass">✓ 19/20 pasaron</span></td>
         <td><a href="https://mateo-var.github.io/Fase-4/runs/2026-04-09_19-18/" class="btn">Ver reporte →</a></td>
       </tr>
       <tr>
-        <td><a href="https://mateo-var.github.io/Fase-4/runs/2026-04-09_19-14/">2026-04-09 19-14</a></td>
-        <td>20</td>
-        <td>19</td>
-        <td><span class="pass">all pass</span></td>
+        <td>
+          
+          <a href="https://mateo-var.github.io/Fase-4/runs/2026-04-09_19-14/">2026-04-09 19-14</a>
+        </td>
+        <td><span class="pass">✓ 19/20 pasaron</span></td>
         <td><a href="https://mateo-var.github.io/Fase-4/runs/2026-04-09_19-14/" class="btn">Ver reporte →</a></td>
       </tr>
       </tbody>
