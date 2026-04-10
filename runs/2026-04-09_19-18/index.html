@@ -11,6 +11,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -31,7 +32,11 @@
   /* Widgets y cards */
   .widget, .card, .summary, .chart-widget { background: #161b22 !important; border-color: #30363d !important; }
   .widget__title, .card__title { color: #8b949e !important; }
-  .y-axis text, .x-axis text, .label { fill: #8b949e !important; }
+  /* SVG text — por defecto fill es negro en SVG, sobreescribir globalmente */
+  svg text { fill: #8b949e !important; }
+  .y-axis text, .x-axis text { fill: #8b949e !important; }
+  .chart__legend-text, .summary-widget__stats span,
+  .widget__column span, .widget__flex-line span { color: #e6edf3 !important; }
   /* Header */
   .header { background: #161b22 !important; border-bottom: 1px solid #30363d !important; }
   .header__name { color: #e6edf3 !important; }
