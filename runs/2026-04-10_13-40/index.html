@@ -53,6 +53,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -166,28 +167,44 @@
     var favicon = document.querySelector('link[rel="icon"]');
     if (favicon) favicon.href = SRC;
 
+    var head = document.querySelector('.side-nav__head');
     var brand = document.querySelector('.side-nav__brand');
     var injected = document.querySelector('.qa-injected-logo');
+    
     if (injected) {
         logoDone = true;
         return;
     }
+    
     if (brand) {
         var img = document.createElement('img');
         img.src = SRC;
         img.className = 'qa-injected-logo';
-        img.style.cssText = 'height:40px; width:auto; display:block; margin: 0 auto;';
-        // Elimina el SVG original y el texto de Allure
+        img.style.cssText = 'height:40px; width:auto; display:block; margin: 0 auto; position: relative; z-index: 999;';
+        
         brand.innerHTML = '';
         brand.appendChild(img);
         brand.style.padding = '10px 0';
+        brand.style.background = 'none';
+        brand.style.display = 'flex';
+        brand.style.justifyContent = 'center';
+        brand.style.alignItems = 'center';
+        
+        // Remove background image and any pseudo-elements via inline stylesheet injection
+        var style = document.getElementById('qa-logo-style-fix');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'qa-logo-style-fix';
+            style.innerHTML = '.side-nav__brand::before, .side-nav__brand::after, .side-nav__brand-mark { display: none !important; background: none !important; content: none !important; } .side-nav__head { background: none !important; }';
+            document.head.appendChild(style);
+        }
         logoDone = true;
     }
   }
 
   var obs = new MutationObserver(replaceLogo);
   obs.observe(document.documentElement, { childList: true, subtree: true });
-  [300, 800, 1800, 3500].forEach(function(t) { setTimeout(replaceLogo, t); });
+  [50, 200, 600, 1500].forEach(function(t) { setTimeout(replaceLogo, t); });
 })();
 </script></head>
 <body>
