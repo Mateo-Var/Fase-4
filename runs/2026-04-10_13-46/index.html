@@ -48,6 +48,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -134,30 +135,26 @@
 
 <script id="qa-widget-hider">
 (function () {
-  var KEEP = ['suites', 'suite'];
-
   function clean() {
     document.querySelectorAll('.widget').forEach(function (w) {
       if (w.classList.contains('summary')) return;
 
       var titleEl = w.querySelector('.widget__title');
       var title   = titleEl ? titleEl.textContent.toLowerCase().trim() : '';
-      var keep    = KEEP.some(function (k) { return title.indexOf(k) !== -1; });
+      var isSuites = title.indexOf('suite') !== -1 || w.querySelector('.bar') !== null;
 
-      if (!keep) {
-        w.style.setProperty('display', 'none', 'important');
+      if (!isSuites) {
+        w.parentNode && w.parentNode.removeChild(w);
       } else {
-        w.style.setProperty('width', '100%', 'important');
-        w.style.setProperty('max-width', 'none', 'important');
+        w.style.width = '100%';
+        w.style.maxWidth = 'none';
       }
     });
     var s = document.querySelector('.summary');
-    if (s) { s.style.setProperty('width', '100%', 'important'); s.style.setProperty('max-width', 'none', 'important'); }
+    if (s) { s.style.width = '100%'; s.style.maxWidth = 'none'; }
   }
 
-  var obs = new MutationObserver(clean);
-  obs.observe(document.documentElement, { childList: true, subtree: true });
-  [300, 800, 1500, 3000, 5000].forEach(function (t) { setTimeout(clean, t); });
+  [600, 1500, 3000, 5000].forEach(function (t) { setTimeout(clean, t); });
 })();
 </script>
 
