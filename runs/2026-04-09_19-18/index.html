@@ -82,6 +82,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -364,10 +365,17 @@
     document.body.appendChild(b);
   }
 
+  window.__qaTargets = null;
+  window.__qaFilterBusy = false;
+
   window.applyAllureFilter = function(targets) {
-    console.log('QA Dashboard ' + VERSION + ': Click detected', targets);
-    sessionStorage.setItem('qa_target_filter', JSON.stringify(targets));
-    location.hash = '#suites';
+    console.log('QA Dashboard ' + VERSION + ': Applying filter for:', targets);
+    window.__qaTargets = targets;
+    if (location.hash.indexOf('#suites') !== -1) {
+        applyFilterWhenReady();
+    } else {
+        location.hash = '#suites';
+    }
   };
 
   function forceClick(el) {
@@ -378,47 +386,39 @@
       } catch(e) {}
   }
 
-  function executeFilterLogic() {
-    var raw = sessionStorage.getItem('qa_target_filter');
-    if (!raw || location.hash.indexOf('#suites') === -1) return;
-    var container = document.querySelector('.status-toggle');
-    if (!container) return;
-    
-    var targets = JSON.parse(raw);
-    sessionStorage.removeItem('qa_target_filter');
-    console.log('QA Dashboard ' + VERSION + ': Applying filter intent', targets);
-    
-    var statuses = ['passed', 'failed', 'broken', 'skipped', 'unknown'];
-    statuses.forEach(function(st, idx) {
-        setTimeout(function() {
-            var btn = document.querySelector('.status-toggle__item_status_' + st) || 
-                      document.querySelector('.status-toggle__item.status-toggle__item_status_' + st);
-            
-            if (!btn) {
-                console.log('QA Dashboard ' + VERSION + ': NOT found button for', st);
-                return;
-            }
-            
-            console.log('QA Dashboard ' + VERSION + ': Found button for', st);
-            var isActive = btn.classList.contains('status-toggle__item_active');
-            var shouldBeActive = targets.includes(st) || targets.includes('all');
-            if (isActive !== shouldBeActive) {
-                console.log('QA Dashboard ' + VERSION + ': Toggling', st);
-                forceClick(btn);
-                setTimeout(function() {
-                    var btnR = document.querySelector('.status-toggle__item_status_' + st);
-                    if (btnR && btnR.classList.contains('status-toggle__item_active') !== shouldBeActive) {
-                        forceClick(btnR);
-                    }
-                }, 200);
-            }
-        }, idx * 250);
-    });
+  function applyFilterWhenReady() {
+      if (window.__qaFilterBusy || !window.__qaTargets) return;
+      if (location.hash.indexOf('#suites') === -1) return;
+      var container = document.querySelector('.status-toggle');
+      if (!container) {
+          setTimeout(applyFilterWhenReady, 150);
+          return;
+      }
+      window.__qaFilterBusy = true;
+      var targets = window.__qaTargets;
+      window.__qaTargets = null;
+      console.log('QA Dashboard ' + VERSION + ': Buttons found, applying filters:', targets);
+      var statuses = ['passed', 'failed', 'broken', 'skipped', 'unknown'];
+      var delay = 0;
+      statuses.forEach(function(st) {
+          setTimeout(function() {
+              var btn = document.querySelector('.status-toggle__item_status_' + st);
+              if (!btn) return;
+              var isActive = btn.classList.contains('status-toggle__item_active');
+              var shouldBeActive = targets.indexOf(st) !== -1 || targets.indexOf('all') !== -1;
+              if (isActive !== shouldBeActive) {
+                  console.log('QA Dashboard ' + VERSION + ': Toggle', st, '->', shouldBeActive);
+                  forceClick(btn);
+              }
+          }, delay);
+          delay += 120;
+      });
+      setTimeout(function() { window.__qaFilterBusy = false; }, delay + 200);
   }
 
   function modifySummary() {
     addVersionBadge();
-    executeFilterLogic();
+    applyFilterWhenReady();
     var summary = document.querySelector('.widget[data-id="summary"]');
     if (!summary || summary.hasAttribute('data-customized-v11')) return;
     summary.setAttribute('data-customized-v11', 'true');
@@ -497,7 +497,7 @@
 
   var obs = new MutationObserver(function() {
       modifySummary();
-      executeFilterLogic();
+      applyFilterWhenReady();
   });
   obs.observe(document.documentElement, { childList: true, subtree: true });
   [100, 500, 1500, 3000].forEach(function(t) { setTimeout(modifySummary, t); });
