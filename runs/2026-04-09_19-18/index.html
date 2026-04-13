@@ -74,6 +74,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -208,7 +209,7 @@
         // 3. Inyectar Contenedor de Cards
         var customBox = document.createElement('div');
         customBox.className = 'qa-custom-box';
-        customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; max-width: 280px !important; margin: 0 !important;";
+        customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; max-width: 280px !important; margin: 0 auto !important;";
         statsNode.appendChild(customBox);
 
         fetch('widgets/summary.json').then(res => res.json()).then(data => {
