@@ -62,6 +62,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -176,31 +177,32 @@
        // Force flex layout to split text vs chart properly
        var parentContent = statsNode.parentNode;
        if (parentContent) {
-           parentContent.style.display = 'grid';
-           parentContent.style.gridTemplateColumns = '1fr 1fr';
-           parentContent.style.alignItems = 'start';
-           parentContent.style.width = '100%'; 
-           parentContent.style.boxSizing = 'border-box';
-           parentContent.style.gap = '40px'; 
-           parentContent.style.padding = '10px 20px';
+           parentContent.style.setProperty('display', 'flex', 'important');
+           parentContent.style.setProperty('flex-direction', 'row', 'important');
+           parentContent.style.setProperty('width', '100%', 'important');
+           parentContent.style.setProperty('gap', '30px', 'important');
+           parentContent.style.setProperty('align-items', 'flex-start', 'important');
        }
        
        var chartNode = summary.querySelector('.summary-widget__chart');
        if (chartNode) {
-           chartNode.style.width = '100%';
-           chartNode.style.minHeight = '250px';
-           chartNode.style.display = 'flex';
-           chartNode.style.justifyContent = 'center';
-           chartNode.style.alignItems = 'center';
+           chartNode.style.setProperty('flex', '1', 'important');
+           chartNode.style.setProperty('width', '50%', 'important');
+           chartNode.style.setProperty('min-width', '0', 'important');
+           chartNode.style.setProperty('display', 'flex', 'important');
+           chartNode.style.setProperty('justify-content', 'center', 'important');
+           chartNode.style.setProperty('min-height', '300px', 'important');
        }
        
        fetch('widgets/summary.json').then(res => res.json()).then(data => {
             var s = data.statistic;
             var box = document.createElement('div');
-            box.style.display = 'flex'; 
-            box.style.flexDirection = 'column';
-            box.style.gap = '15px'; 
-            box.style.width = '100%';
+            box.style.setProperty('display', 'flex', 'important');
+            box.style.setProperty('flex-direction', 'column', 'important');
+            box.style.setProperty('gap', '15px', 'important');
+            box.style.setProperty('width', '50%', 'important');
+            box.style.setProperty('flex', '1', 'important');
+            box.style.setProperty('min-width', '0', 'important');
             
             function createCard(label, count, color, bg) {
                return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-width: 200px;">' +
