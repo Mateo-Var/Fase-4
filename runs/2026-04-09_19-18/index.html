@@ -52,6 +52,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -165,34 +166,22 @@
     var favicon = document.querySelector('link[rel="icon"]');
     if (favicon) favicon.href = SRC;
 
-    if (logoDone) return;
-
-    var selectors = [
-      'img[src*="logo"]',
-      '.side-nav img', '.side-nav svg',
-      '.side-nav__logo', '.side-nav__logo img', '.side-nav__logo svg',
-      '.header img', '.header svg',
-      '.header__logo img', '.header__logo svg',
-      'nav img', 'nav svg',
-      '[class*="logo"] img', '[class*="logo"] svg',
-      '[class*="logo"]'
-    ];
-
-    for (var i = 0; i < selectors.length; i++) {
-      var el = document.querySelector(selectors[i]);
-      if (!el) continue;
-      if (el.tagName === 'IMG') {
-        el.src = SRC;
-        el.style.cssText += ';height:36px!important;width:auto!important;';
-        logoDone = true; return;
-      }
-      if (el.tagName === 'svg' || el.tagName === 'SVG') {
+    var brand = document.querySelector('.side-nav__brand');
+    var injected = document.querySelector('.qa-injected-logo');
+    if (injected) {
+        logoDone = true;
+        return;
+    }
+    if (brand) {
         var img = document.createElement('img');
         img.src = SRC;
-        img.style.cssText = 'height:36px;width:auto;display:block;';
-        el.parentNode.replaceChild(img, el);
-        logoDone = true; return;
-      }
+        img.className = 'qa-injected-logo';
+        img.style.cssText = 'height:40px; width:auto; display:block; margin: 0 auto;';
+        // Elimina el SVG original y el texto de Allure
+        brand.innerHTML = '';
+        brand.appendChild(img);
+        brand.style.padding = '10px 0';
+        logoDone = true;
     }
   }
 
