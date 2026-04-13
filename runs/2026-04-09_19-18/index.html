@@ -47,6 +47,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -105,7 +106,7 @@
 </style>
 
 <style id="qa-widget-layout">
-  /* Forzar columna única full-width — sobreescribir max-width de Allure */
+  /* Forzar columna única full-width */
   .app__content {
     display: flex !important;
     flex-direction: column !important;
@@ -117,7 +118,6 @@
     box-sizing: border-box !important;
   }
 
-  /* Cada hijo directo ocupa todo el ancho */
   .app__content > * {
     flex: 0 0 auto !important;
     width: 100% !important;
@@ -127,7 +127,6 @@
     margin: 0 0 16px 0 !important;
   }
 
-  /* Barras de suites más visibles */
   .bar { height: 24px !important; border-radius: 4px !important; }
   .bar__fill { height: 24px !important; }
   .widget__body { width: 100% !important; box-sizing: border-box !important; }
@@ -137,47 +136,28 @@
 (function () {
   var KEEP = ['suites', 'suite'];
 
-  function applyLayout() {
-    var content = document.querySelector('.app__content');
-    if (!content || !content.children.length) return false;
+  function clean() {
+    document.querySelectorAll('.widget').forEach(function (w) {
+      if (w.classList.contains('summary')) return;
 
-    var children = Array.prototype.slice.call(content.children);
-
-    // Esperar a que al menos un widget tenga título cargado
-    var titlesLoaded = children.some(function (child, i) {
-      if (i === 0) return false;
-      var t = child.querySelector('.widget__title');
-      return t && t.textContent.trim().length > 0;
-    });
-    if (!titlesLoaded) return false;
-
-    children.forEach(function (child, index) {
-      if (index === 0) {
-        child.style.setProperty('display', 'block', 'important');
-        child.style.setProperty('width', '100%', 'important');
-        child.style.setProperty('max-width', 'none', 'important');
-        return;
-      }
-
-      var titleEl = child.querySelector('.widget__title');
+      var titleEl = w.querySelector('.widget__title');
       var title   = titleEl ? titleEl.textContent.toLowerCase().trim() : '';
       var keep    = KEEP.some(function (k) { return title.indexOf(k) !== -1; });
 
-      if (keep) {
-        child.style.setProperty('display', 'block', 'important');
-        child.style.setProperty('width', '100%', 'important');
-        child.style.setProperty('max-width', 'none', 'important');
+      if (!keep) {
+        w.style.setProperty('display', 'none', 'important');
       } else {
-        child.style.setProperty('display', 'none', 'important');
+        w.style.setProperty('width', '100%', 'important');
+        w.style.setProperty('max-width', 'none', 'important');
       }
     });
-
-    return true;
+    var s = document.querySelector('.summary');
+    if (s) { s.style.setProperty('width', '100%', 'important'); s.style.setProperty('max-width', 'none', 'important'); }
   }
 
-  var obs = new MutationObserver(applyLayout);
+  var obs = new MutationObserver(clean);
   obs.observe(document.documentElement, { childList: true, subtree: true });
-  [300, 800, 1500, 3000].forEach(function (t) { setTimeout(applyLayout, t); });
+  [300, 800, 1500, 3000, 5000].forEach(function (t) { setTimeout(clean, t); });
 })();
 </script>
 
