@@ -45,6 +45,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -134,13 +135,20 @@
 <script id="qa-widget-hider">
 (function () {
   var KEEP = ['suites', 'suite'];
-  var done = false;
 
   function applyLayout() {
     var content = document.querySelector('.app__content');
     if (!content || !content.children.length) return false;
 
     var children = Array.prototype.slice.call(content.children);
+
+    // Esperar a que al menos un widget tenga título cargado
+    var titlesLoaded = children.some(function (child, i) {
+      if (i === 0) return false;
+      var t = child.querySelector('.widget__title');
+      return t && t.textContent.trim().length > 0;
+    });
+    if (!titlesLoaded) return false;
 
     children.forEach(function (child, index) {
       if (index === 0) {
@@ -154,7 +162,7 @@
       var title   = titleEl ? titleEl.textContent.toLowerCase().trim() : '';
       var keep    = KEEP.some(function (k) { return title.indexOf(k) !== -1; });
 
-      if (keep || title === '') {
+      if (keep) {
         child.style.setProperty('display', 'block', 'important');
         child.style.setProperty('width', '100%', 'important');
         child.style.setProperty('max-width', 'none', 'important');
@@ -163,13 +171,12 @@
       }
     });
 
-    done = true;
     return true;
   }
 
-  var obs = new MutationObserver(function () { if (!done) applyLayout(); });
+  var obs = new MutationObserver(applyLayout);
   obs.observe(document.documentElement, { childList: true, subtree: true });
-  [200, 600, 1200, 2500].forEach(function (t) { setTimeout(applyLayout, t); });
+  [300, 800, 1500, 3000].forEach(function (t) { setTimeout(applyLayout, t); });
 })();
 </script>
 
@@ -185,6 +192,7 @@
     if (logoDone) return;
 
     var selectors = [
+      'img[src*="logo"]',
       '.side-nav img', '.side-nav svg',
       '.side-nav__logo', '.side-nav__logo img', '.side-nav__logo svg',
       '.header img', '.header svg',
