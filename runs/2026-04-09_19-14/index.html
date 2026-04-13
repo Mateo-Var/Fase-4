@@ -76,6 +76,103 @@
 
 
 
+<script id="qa-custom-summary-v3">
+(function () {
+  function modifySummary() {
+    var summary = document.querySelector('.widget[data-id="summary"]');
+    if (!summary) return;
+    
+    // 1. Inyectar Estilos Globales (Cache Bypass v3)
+    var styleId = 'qa-layout-fix-v3';
+    if (!document.getElementById(styleId)) {
+        var st = document.createElement('style');
+        st.id = styleId;
+        st.innerHTML = '.widget[data-id="summary"] .summary-widget { display: flex !important; flex-direction: row !important; width: 100% !important; gap: 40px !important; align-items: flex-start !important; padding: 10px 0 !important; } ' +
+                       '.widget[data-id="summary"] .summary-widget__stats { display: flex !important; flex-direction: column !important; width: 50% !important; flex: 1 !important; min-width: 0 !important; margin: 0 !important; justify-content: center !important; align-items: center !important; min-height: 300px !important; } ' +
+                       '.widget[data-id="summary"] .summary-widget__chart { display: block !important; width: 50% !important; flex: 1 !important; min-height: 300px !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; border: none !important; } ' +
+                       '.widget[data-id="summary"] .summary-widget__chart svg { width: 100% !important; height: 100% !important; max-width: 280px !important; max-height: 280px !important; display: block !important; margin: 0 auto !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; } ' +
+                       '@media (max-width: 768px) { .widget[data-id="summary"] .summary-widget { flex-direction: column !important; } .widget[data-id="summary"] .summary-widget__stats, .widget[data-id="summary"] .summary-widget__chart { width: 100% !important; } }';
+        document.head.appendChild(st);
+    }
+
+    var statsNode = summary.querySelector('.summary-widget__stats');
+    if (statsNode && !statsNode.hasAttribute('data-customized-v3')) {
+        statsNode.setAttribute('data-customized-v3', 'true');
+        
+        // Estrategia NO destructiva
+        Array.from(statsNode.children).forEach(function(child) {
+            if (!child.classList.contains('widget__title')) {
+                child.style.display = 'none';
+            }
+        });
+        
+        // 2. Preparar Título y Subtítulo
+        var title = summary.querySelector('.widget__title');
+        if (title) {
+            title.style.cssText = 'margin: 0 !important; text-align: center !important; width: 100% !important; display: block !important; font-weight: bold !important; color: #8b949e !important; font-size: 20px !important;';
+        }
+
+        // 3. Inyectar Contenedor de Cards con Envoltura de Centrado
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = "width: 100%; display: flex; justify-content: center; margin: 0; padding: 0;";
+        
+        var customBox = document.createElement('div');
+        customBox.className = 'qa-custom-box';
+        customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; max-width: 280px !important; margin: 0 auto !important;";
+        
+        wrapper.appendChild(customBox);
+        statsNode.appendChild(wrapper);
+
+        fetch('widgets/summary.json').then(res => res.json()).then(data => {
+            var s = data.statistic;
+            var t = data.time;
+            
+            // Formatear Fecha y Hora
+            var stDate = new Date(t.start);
+            var dateStr = stDate.getDate() + '/' + (stDate.getMonth() + 1) + '/' + stDate.getFullYear();
+            var startStr = stDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            var endStr = new Date(t.stop).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            var durStr = Math.floor(t.duration / 60000) + 'm ' + Math.floor((t.duration % 60000) / 1000) + 's';
+            
+            if (title) {
+                title.innerHTML = 'QA REPORT ' + dateStr;
+                var subId = 'qa-sub-v3';
+                if (!document.getElementById(subId)) {
+                    var sub = document.createElement('div');
+                    sub.id = subId;
+                    sub.style.cssText = 'color: #8b949e; font-size: 13px; margin: 5px 0 20px 0 !important; font-weight: normal; text-align: center !important; width: 100% !important; display: block !important;';
+                    sub.innerHTML = startStr + ' - ' + endStr + ' (' + durStr + ')';
+                    title.after(sub);
+                }
+            }
+
+            function createCard(label, count, color, bg) {
+               return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
+                      '<div style="font-size:13px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; letter-spacing: 0.5px; white-space: nowrap;">' + label + '</div>' + 
+                      '<div style="font-size:28px; font-weight:bold; color:'+color+';">' + (count || 0) + '</div>' +
+                      '</div>';
+            }
+            
+            var fallidos = (s.failed || 0) + (s.broken || 0);
+            customBox.innerHTML = createCard('Total Casos', s.total, '#58a6ff', '#1f2428') +
+                                  createCard('Aprobados', s.passed, '#3fb950', '#1c2e22') +
+                                  createCard('Fallidos', fallidos, '#f85149', '#301c1c');
+            
+            console.log('QA Dashboard v3: Cards injected as centered block.');
+            [100, 500, 1500].forEach(function(t) {
+                setTimeout(function() { window.dispatchEvent(new Event('resize')); }, t);
+            });
+        }).catch(e => console.log('Error QA Report:', e));
+    }
+  }
+  console.log('QA Dashboard v3: Script running...');
+  var obs = new MutationObserver(modifySummary);
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+  [100, 500, 1500, 3000].forEach(function(t) { setTimeout(modifySummary, t); });
+})();
+</script>
+
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -171,19 +268,38 @@
 })();
 </script>
 
-<script id="qa-custom-summary-v3">
+<script id="qa-custom-summary-v4">
 (function () {
+  window.applyAllureFilter = function(targets) {
+      location.hash = '#suites';
+      var attempts = 0;
+      var interval = setInterval(function() {
+          attempts++;
+          var toggles = document.querySelectorAll('.status-toggle__item');
+          if (toggles.length > 0) {
+              clearInterval(interval);
+              toggles.forEach(function(el) {
+                  var match = el.className.match(/status_([a-z]+)/);
+                  if (!match) return;
+                  var status = match[1];
+                  var isActive = el.classList.contains('status-toggle__item_active');
+                  var shouldBeActive = targets.includes(status) || targets.includes('all');
+                  if (isActive !== shouldBeActive) { el.click(); }
+              });
+          } else if (attempts > 30) { clearInterval(interval); }
+      }, 200);
+  };
+
   function modifySummary() {
     var summary = document.querySelector('.widget[data-id="summary"]');
     if (!summary) return;
     
-    // 1. Inyectar Estilos Globales (Cache Bypass v3)
-    var styleId = 'qa-layout-fix-v3';
+    var styleId = 'qa-layout-fix-v4';
     if (!document.getElementById(styleId)) {
         var st = document.createElement('style');
         st.id = styleId;
         st.innerHTML = '.widget[data-id="summary"] .summary-widget { display: flex !important; flex-direction: row !important; width: 100% !important; gap: 40px !important; align-items: flex-start !important; padding: 10px 0 !important; } ' +
-                       '.widget[data-id="summary"] .summary-widget__stats { display: flex !important; flex-direction: column !important; width: 50% !important; flex: 1 !important; min-width: 0 !important; margin: 0 !important; justify-content: center !important; align-items: center !important; min-height: 300px !important; } ' +
+                       '.widget[data-id="summary"] .summary-widget__stats { display: flex !important; flex-direction: column !important; width: 50% !important; flex: 1 !important; min-width: 0 !important; margin: 0 !important; justify-content: center !important; align-items: center !important; min-height: 300px !important; text-align: center !important; } ' +
                        '.widget[data-id="summary"] .summary-widget__chart { display: block !important; width: 50% !important; flex: 1 !important; min-height: 300px !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; border: none !important; } ' +
                        '.widget[data-id="summary"] .summary-widget__chart svg { width: 100% !important; height: 100% !important; max-width: 280px !important; max-height: 280px !important; display: block !important; margin: 0 auto !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; } ' +
                        '@media (max-width: 768px) { .widget[data-id="summary"] .summary-widget { flex-direction: column !important; } .widget[data-id="summary"] .summary-widget__stats, .widget[data-id="summary"] .summary-widget__chart { width: 100% !important; } }';
@@ -191,38 +307,28 @@
     }
 
     var statsNode = summary.querySelector('.summary-widget__stats');
-    if (statsNode && !statsNode.hasAttribute('data-customized-v3')) {
-        statsNode.setAttribute('data-customized-v3', 'true');
-        
-        // Estrategia NO destructiva
+    if (statsNode && !statsNode.hasAttribute('data-customized-v4')) {
+        statsNode.setAttribute('data-customized-v4', 'true');
         Array.from(statsNode.children).forEach(function(child) {
-            if (!child.classList.contains('widget__title')) {
-                child.style.display = 'none';
-            }
+            if (!child.classList.contains('widget__title')) { child.style.display = 'none'; }
         });
         
-        // 2. Preparar Título y Subtítulo
         var title = summary.querySelector('.widget__title');
         if (title) {
             title.style.cssText = 'margin: 0 !important; text-align: center !important; width: 100% !important; display: block !important; font-weight: bold !important; color: #8b949e !important; font-size: 20px !important;';
         }
 
-        // 3. Inyectar Contenedor de Cards con Envoltura de Centrado
         var wrapper = document.createElement('div');
         wrapper.style.cssText = "width: 100%; display: flex; justify-content: center; margin: 0; padding: 0;";
-        
         var customBox = document.createElement('div');
         customBox.className = 'qa-custom-box';
         customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; max-width: 280px !important; margin: 0 auto !important;";
-        
         wrapper.appendChild(customBox);
         statsNode.appendChild(wrapper);
 
         fetch('widgets/summary.json').then(res => res.json()).then(data => {
             var s = data.statistic;
             var t = data.time;
-            
-            // Formatear Fecha y Hora
             var stDate = new Date(t.start);
             var dateStr = stDate.getDate() + '/' + (stDate.getMonth() + 1) + '/' + stDate.getFullYear();
             var startStr = stDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -231,7 +337,7 @@
             
             if (title) {
                 title.innerHTML = 'QA REPORT ' + dateStr;
-                var subId = 'qa-sub-v3';
+                var subId = 'qa-sub-v4';
                 if (!document.getElementById(subId)) {
                     var sub = document.createElement('div');
                     sub.id = subId;
@@ -241,26 +347,26 @@
                 }
             }
 
-            function createCard(label, count, color, bg) {
-               return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
-                      '<div style="font-size:13px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; letter-spacing: 0.5px; white-space: nowrap;">' + label + '</div>' + 
-                      '<div style="font-size:28px; font-weight:bold; color:'+color+';">' + (count || 0) + '</div>' +
-                      '</div>';
+            function createCard(label, count, color, bg, filterTargets) {
+               var card = document.createElement('div');
+               card.style.cssText = 'background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.2s; transition: filter 0.2s;';
+               card.onmouseover = function() { this.style.filter = 'brightness(1.2)'; this.style.transform = 'scale(1.02)'; };
+               card.onmouseout = function() { this.style.filter = 'brightness(1)'; this.style.transform = 'scale(1)'; };
+               card.onclick = function() { window.applyAllureFilter(filterTargets); };
+               card.innerHTML = '<div style="font-size:13px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; letter-spacing: 0.5px; white-space: nowrap; pointer-events: none;">' + label + '</div>' + 
+                                '<div style="font-size:28px; font-weight:bold; color:'+color+'; pointer-events: none;">' + (count || 0) + '</div>';
+               return card;
             }
             
-            var fallidos = (s.failed || 0) + (s.broken || 0);
-            customBox.innerHTML = createCard('Total Casos', s.total, '#58a6ff', '#1f2428') +
-                                  createCard('Aprobados', s.passed, '#3fb950', '#1c2e22') +
-                                  createCard('Fallidos', fallidos, '#f85149', '#301c1c');
+            var fallidosCount = (s.failed || 0) + (s.broken || 0);
+            customBox.appendChild(createCard('Total Casos', s.total, '#58a6ff', '#1f2428', ['all']));
+            customBox.appendChild(createCard('Aprobados', s.passed, '#3fb950', '#1c2e22', ['passed']));
+            customBox.appendChild(createCard('Fallidos', fallidosCount, '#f85149', '#301c1c', ['failed', 'broken']));
             
-            console.log('QA Dashboard v3: Cards injected as centered block.');
-            [100, 500, 1500].forEach(function(t) {
-                setTimeout(function() { window.dispatchEvent(new Event('resize')); }, t);
-            });
+            [100, 500, 1500].forEach(function(t) { setTimeout(function() { window.dispatchEvent(new Event('resize')); }, t); });
         }).catch(e => console.log('Error QA Report:', e));
     }
   }
-  console.log('QA Dashboard v3: Script running...');
   var obs = new MutationObserver(modifySummary);
   obs.observe(document.documentElement, { childList: true, subtree: true });
   [100, 500, 1500, 3000].forEach(function(t) { setTimeout(modifySummary, t); });
