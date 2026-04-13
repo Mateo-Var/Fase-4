@@ -65,6 +65,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -166,96 +167,84 @@
     var summary = document.querySelector('.widget[data-id="summary"]');
     if (!summary) return;
     
-    var statsNode = summary.querySelector('.summary-widget__stats');
-    var chartNode = summary.querySelector('.summary-widget__chart');
-    if (!statsNode || !chartNode || statsNode.hasAttribute('data-customized')) return;
-    
-    statsNode.setAttribute('data-customized', 'true');
-    statsNode.style.setProperty('display', 'none', 'important');
-    
-    // 1. Crear el gran contenedor 50/50
-    var mainWrapper = document.createElement('div');
-    mainWrapper.style.setProperty('display', 'flex', 'important');
-    mainWrapper.style.setProperty('flex-direction', 'row', 'important');
-    mainWrapper.style.setProperty('width', '100%', 'important');
-    mainWrapper.style.setProperty('gap', '40px', 'important');
-    mainWrapper.style.setProperty('align-items', 'flex-start', 'important');
-    mainWrapper.style.setProperty('padding', '10px 0', 'important');
-    
-    var leftCol = document.createElement('div');
-    leftCol.style.setProperty('width', '50%', 'important');
-    leftCol.style.setProperty('flex', '1', 'important');
-    leftCol.style.setProperty('display', 'flex', 'important');
-    leftCol.style.setProperty('flex-direction', 'column', 'important');
-    leftCol.style.setProperty('gap', '15px', 'important');
-    
-    var rightCol = document.createElement('div');
-    rightCol.style.setProperty('width', '50%', 'important');
-    rightCol.style.setProperty('flex', '1', 'important');
-    rightCol.style.setProperty('display', 'flex', 'important');
-    rightCol.style.setProperty('justify-content', 'center', 'important');
-    rightCol.style.setProperty('align-items', 'center', 'important');
-    rightCol.style.setProperty('min-height', '280px', 'important');
-    
-    mainWrapper.appendChild(leftCol);
-    mainWrapper.appendChild(rightCol);
-    
-    // 2. Mover el título al lado izquierdo
-    var title = summary.querySelector('.widget__title');
-    if (title) {
-        if (title.innerHTML.match(/Allure Report/i)) {
-          title.innerHTML = title.innerHTML.replace(/Allure Report/i, 'QA REPORT');
-        }
-        title.style.setProperty('margin', '0 0 10px 0', 'important');
-        title.style.setProperty('position', 'static', 'important');
-        leftCol.appendChild(title);
+    // 1. Inyectar Estilos Globales (La forma más robusta)
+    var styleId = 'qa-layout-fix';
+    if (!document.getElementById(styleId)) {
+        var st = document.createElement('style');
+        st.id = styleId;
+        st.innerHTML = `
+            .widget[data-id="summary"] .summary-widget { 
+                display: flex !important; 
+                flex-direction: row !important; 
+                width: 100% !important; 
+                gap: 40px !important;
+                align-items: flex-start !important;
+                padding: 10px 0 !important;
+            }
+            .widget[data-id="summary"] .summary-widget__stats { 
+                display: flex !important; 
+                flex-direction: column !important; 
+                width: 50% !important; 
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+            .widget[data-id="summary"] .summary-widget__chart { 
+                display: flex !important; 
+                width: 50% !important; 
+                flex: 1 !important;
+                justify-content: center !important;
+                align-items: center !important;
+                min-height: 300px !important;
+                min-width: 0 !important;
+            }
+            .widget[data-id="summary"] .summary-widget__chart svg { 
+                width: 100% !important; 
+                height: 100% !important; 
+                max-width: 250px !important;
+                max-height: 250px !important;
+            }
+        `;
+        document.head.appendChild(st);
     }
-    
-    // 3. Obtener datos e inyectar cards en el lado izquierdo
-    fetch('widgets/summary.json').then(res => res.json()).then(data => {
-        var s = data.statistic;
+
+    var statsNode = summary.querySelector('.summary-widget__stats');
+    if (statsNode && !statsNode.hasAttribute('data-customized')) {
+        statsNode.setAttribute('data-customized', 'true');
         
-        function createCard(label, count, color, bg) {
-           return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
-                  '<div style="font-size:13px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; letter-spacing: 0.5px; white-space: nowrap;">' + label + '</div>' + 
-                  '<div style="font-size:28px; font-weight:bold; color:'+color+';">' + (count || 0) + '</div>' +
-                  '</div>';
+        // Limpiar stats originales de Allure
+        statsNode.innerHTML = '';
+        
+        // 2. Preparar Título
+        var title = summary.querySelector('.widget__title');
+        if (title) {
+            if (title.innerHTML.match(/Allure Report/i)) {
+                title.innerHTML = title.innerHTML.replace(/Allure Report/i, 'QA REPORT');
+            }
+            title.style.setProperty('margin', '0 0 15px 0', 'important');
+            statsNode.appendChild(title);
         }
-        
-        var box = document.createElement('div');
-        box.style.setProperty('display', 'flex', 'important');
-        box.style.setProperty('flex-direction', 'column', 'important');
-        box.style.setProperty('gap', '15px', 'important');
-        box.style.setProperty('width', '100%', 'important');
-        
-        var fallidos = (s.failed || 0) + (s.broken || 0);
-        box.innerHTML = createCard('Total Casos', s.total, '#58a6ff', '#1f2428') +
-                        createCard('Aprobados', s.passed, '#3fb950', '#1c2e22') +
-                        createCard('Fallidos', fallidos, '#f85149', '#301c1c');
-        
-        leftCol.appendChild(box);
-        
-        // 4. Mover la gráfica físicamente al lado derecho y forzar su escala
-        rightCol.appendChild(chartNode);
-        chartNode.style.setProperty('display', 'flex', 'important');
-        chartNode.style.setProperty('justify-content', 'center', 'important');
-        chartNode.style.setProperty('align-items', 'center', 'important');
-        chartNode.style.setProperty('width', '100%', 'important');
-        chartNode.style.setProperty('height', '300px', 'important');
-        chartNode.style.setProperty('overflow', 'visible', 'important');
-        
-        // Forzar al SVG interno a ser responsivo
-        var svg = chartNode.querySelector('svg');
-        if (svg) {
-            svg.style.setProperty('width', '100%', 'important');
-            svg.style.setProperty('height', '100%', 'important');
-            svg.style.setProperty('max-width', '250px', 'important'); 
-            svg.style.setProperty('max-height', '250px', 'important');
-        }
-        
-        // 5. Insertar todo el conjunto en el DOM
-        statsNode.parentNode.insertBefore(mainWrapper, statsNode);
-    }).catch(e => console.log('Error QA Report:', e));
+
+        // 3. Cargar Datos e Inyectar Cards
+        fetch('widgets/summary.json').then(res => res.json()).then(data => {
+            var s = data.statistic;
+            var box = document.createElement('div');
+            box.style.cssText = "display: flex !important; flex-direction: column !important; gap: 15px !important; width: 100% !important;";
+            
+            function createCard(label, count, color, bg) {
+               return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
+                      '<div style="font-size:13px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; letter-spacing: 0.5px; white-space: nowrap;">' + label + '</div>' + 
+                      '<div style="font-size:28px; font-weight:bold; color:'+color+';">' + (count || 0) + '</div>' +
+                      '</div>';
+            }
+            
+            var fallidos = (s.failed || 0) + (s.broken || 0);
+            box.innerHTML = createCard('Total Casos', s.total, '#58a6ff', '#1f2428') +
+                            createCard('Aprobados', s.passed, '#3fb950', '#1c2e22') +
+                            createCard('Fallidos', fallidos, '#f85149', '#301c1c');
+            
+            statsNode.appendChild(box);
+        }).catch(e => console.log('Error QA Report:', e));
+    }
   }
   var obs = new MutationObserver(modifySummary);
   obs.observe(document.documentElement, { childList: true, subtree: true });
