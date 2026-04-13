@@ -58,6 +58,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -175,8 +176,15 @@
            parentContent.style.display = 'flex';
            parentContent.style.alignItems = 'center';
            parentContent.style.justifyContent = 'space-between';
-           parentContent.style.width = '100%';
+           parentContent.style.width = 'auto'; // Prevent overflow
+           parentContent.style.boxSizing = 'border-box';
            parentContent.style.gap = '30px'; 
+       }
+       
+       var chartNode = summary.querySelector('.summary-widget__chart');
+       if (chartNode) {
+           chartNode.style.flex = '0 0 auto';
+           chartNode.style.marginRight = '20px'; // Beautiful safe space for the chart
        }
        
        fetch('widgets/summary.json').then(res => res.json()).then(data => {
