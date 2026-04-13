@@ -49,6 +49,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -136,13 +137,14 @@
 <script id="qa-widget-hider">
 (function () {
   function clean() {
+    var summary = document.querySelector('.summary');
+    if (!summary || summary.querySelector('.spinner')) return;
+
     document.querySelectorAll('.widget').forEach(function (w) {
       if (w.classList.contains('summary')) return;
-
       var titleEl = w.querySelector('.widget__title');
       var title   = titleEl ? titleEl.textContent.toLowerCase().trim() : '';
       var isSuites = title.indexOf('suite') !== -1 || w.querySelector('.bar') !== null;
-
       if (!isSuites) {
         w.parentNode && w.parentNode.removeChild(w);
       } else {
@@ -150,11 +152,12 @@
         w.style.maxWidth = 'none';
       }
     });
-    var s = document.querySelector('.summary');
-    if (s) { s.style.width = '100%'; s.style.maxWidth = 'none'; }
+
+    summary.style.width = '100%';
+    summary.style.maxWidth = 'none';
   }
 
-  [600, 1500, 3000, 5000].forEach(function (t) { setTimeout(clean, t); });
+  [800, 1800, 3500, 6000].forEach(function (t) { setTimeout(clean, t); });
 })();
 </script>
 
