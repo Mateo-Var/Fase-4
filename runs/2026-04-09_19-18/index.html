@@ -56,6 +56,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -138,7 +139,6 @@
   .bar { height: 24px !important; border-radius: 4px !important; }
   .bar__fill { height: 24px !important; }
   .widget__body { width: 100% !important; box-sizing: border-box !important; }
-  .summary-widget { display: flex; align-items: center; justify-content: space-between; }
 </style>
 
 <script id="qa-widget-hider">
@@ -173,8 +173,10 @@
        if (parentContent) {
            parentContent.style.display = 'flex';
            parentContent.style.alignItems = 'center';
-           parentContent.style.justifyContent = 'space-around';
+           parentContent.style.justifyContent = 'flex-start';
            parentContent.style.width = '100%';
+           parentContent.style.gap = '60px'; 
+           parentContent.style.paddingLeft = '20px';
        }
        
        fetch('widgets/summary.json').then(res => res.json()).then(data => {
@@ -183,14 +185,14 @@
             box.style.display = 'flex'; 
             box.style.flexDirection = 'column';
             box.style.justifyContent = 'center';
-            box.style.gap = '12px'; 
+            box.style.gap = '15px'; 
             box.style.margin = '20px 0'; 
-            box.style.width = '240px';
+            box.style.width = '280px';
             
             function createCard(label, count, color, bg) {
-               return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 6px solid '+color+'; border-radius: 8px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
-                      '<div style="font-size:12px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; letter-spacing: 0.5px;">' + label + '</div>' + 
-                      '<div style="font-size:26px; font-weight:bold; color:'+color+'; line-height: 1;">' + (count || 0) + '</div>' +
+               return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
+                      '<div style="font-size:14px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; letter-spacing: 0.5px;">' + label + '</div>' + 
+                      '<div style="font-size:32px; font-weight:bold; color:'+color+'; line-height: 1;">' + (count || 0) + '</div>' +
                       '</div>';
             }
             var fallidos = (s.failed || 0) + (s.broken || 0);
