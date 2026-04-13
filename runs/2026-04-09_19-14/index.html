@@ -81,6 +81,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -348,18 +349,18 @@
   [50, 200, 600, 1500].forEach(function(t) { setTimeout(replaceLogo, t); });
 })();
 </script>
-<script id="qa-custom-summary-v10-nuclear">
+<script id="qa-custom-summary-v11-stable">
 (function () {
-  const VERSION = 'V10-NUCLEAR';
+  const VERSION = 'V11-STABLE';
   console.log('QA Dashboard loading:', VERSION);
 
   function addVersionBadge() {
-    var bId = 'qa-version-badge-v10';
+    var bId = 'qa-version-badge-v11';
     if (document.getElementById(bId)) return;
     var b = document.createElement('div');
     b.id = bId;
-    b.style.cssText = 'position:fixed; bottom:10px; right:12px; background:rgba(0,0,0,0.85); color:#f38181; padding:6px 14px; border-radius:6px; font-family:monospace; font-size:11px; z-index:999999; border:2px solid #f38181; font-weight:bold;';
-    b.innerHTML = 'QA TOOLS ' + VERSION + ' - RESET ACTIVE';
+    b.style.cssText = 'position:fixed; bottom:10px; right:12px; background:rgba(0,100,0,0.9); color:#fff; padding:6px 14px; border-radius:6px; font-family:monospace; font-size:11px; z-index:999999; border:2px solid #58a6ff; font-weight:bold;';
+    b.innerHTML = 'QA TOOLS ' + VERSION + ' - ACTIVE';
     document.body.appendChild(b);
   }
 
@@ -371,9 +372,10 @@
 
   function forceClick(el) {
       if (!el) return;
-      el.click();
-      var ev = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
-      el.dispatchEvent(ev);
+      try {
+          el.click();
+          el.dispatchEvent(new MouseEvent('click', { view: window, bubbles: true, cancelable: true }));
+      } catch(e) {}
   }
 
   function executeFilterLogic() {
@@ -389,8 +391,15 @@
     var statuses = ['passed', 'failed', 'broken', 'skipped', 'unknown'];
     statuses.forEach(function(st, idx) {
         setTimeout(function() {
-            var btn = document.querySelector('.status-toggle__item_status_' + st);
-            if (!btn) return;
+            var btn = document.querySelector('.status-toggle__item_status_' + st) || 
+                      document.querySelector('.status-toggle__item.status-toggle__item_status_' + st);
+            
+            if (!btn) {
+                console.log('QA Dashboard ' + VERSION + ': NOT found button for', st);
+                return;
+            }
+            
+            console.log('QA Dashboard ' + VERSION + ': Found button for', st);
             var isActive = btn.classList.contains('status-toggle__item_active');
             var shouldBeActive = targets.includes(st) || targets.includes('all');
             if (isActive !== shouldBeActive) {
@@ -411,10 +420,10 @@
     addVersionBadge();
     executeFilterLogic();
     var summary = document.querySelector('.widget[data-id="summary"]');
-    if (!summary || summary.hasAttribute('data-customized-v10')) return;
-    summary.setAttribute('data-customized-v10', 'true');
+    if (!summary || summary.hasAttribute('data-customized-v11')) return;
+    summary.setAttribute('data-customized-v11', 'true');
 
-    var styleId = 'qa-layout-fix-v10';
+    var styleId = 'qa-layout-fix-v11';
     if (!document.getElementById(styleId)) {
         var st = document.createElement('style');
         st.id = styleId;
@@ -422,6 +431,7 @@
                        '.widget[data-id="summary"] .summary-widget__stats { display: flex !important; flex-direction: column !important; width: 50% !important; flex: 1 !important; min-width: 0 !important; margin: 0 !important; justify-content: center !important; align-items: center !important; min-height: 300px !important; text-align: center !important; } ' +
                        '.widget[data-id="summary"] .summary-widget__chart { display: block !important; width: 50% !important; flex: 1 !important; min-height: 300px !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; border: none !important; } ' +
                        '.widget[data-id="summary"] .summary-widget__chart svg { width: 100% !important; height: 100% !important; max-width: 280px !important; max-height: 280px !important; display: block !important; margin: 0 auto !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; } ' +
+                       '.widget[data-id="environment"], .widget[data-id="categories"], .widget[data-id="executors"], .widget[data-id="history"] { display: none !important; } ' +
                        '@media (max-width: 768px) { .widget[data-id="summary"] .summary-widget { flex-direction: column !important; } .widget[data-id="summary"] .summary-widget__stats, .widget[data-id="summary"] .summary-widget__chart { width: 100% !important; } }';
         document.head.appendChild(st);
     }
@@ -438,10 +448,10 @@
         }
 
         var wrapper = document.createElement('div');
-        wrapper.className = 'qa-custom-wrapper-v10';
+        wrapper.className = 'qa-custom-wrapper-v11';
         wrapper.style.cssText = "width: 100%; display: flex; justify-content: center; margin: 0; padding: 0;";
         var customBox = document.createElement('div');
-        customBox.className = 'qa-custom-box-v10';
+        customBox.className = 'qa-custom-box-v11';
         customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; max-width: 280px !important; margin: 0 auto !important;";
         wrapper.appendChild(customBox);
         statsNode.appendChild(wrapper);
@@ -458,7 +468,7 @@
             if (title) {
                 title.innerHTML = 'QA REPORT ' + dateStr;
                 var sub = document.createElement('div');
-                sub.className = 'qa-sub-v10';
+                sub.className = 'qa-sub-v11';
                 sub.style.cssText = 'color: #8b949e; font-size: 13px; margin: 5px 0 20px 0 !important; font-weight: normal; text-align: center !important; width: 100% !important; display: block !important;';
                 sub.innerHTML = startStr + ' - ' + endStr + ' (' + durStr + ')';
                 title.after(sub);
@@ -466,14 +476,11 @@
 
             function createCard(label, count, color, bg, targets) {
                var card = document.createElement('div');
-               card.className = 'qa-card-v10';
+               card.className = 'qa-card-v11';
                card.style.cssText = 'background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s;';
                card.onmouseover = function() { this.style.filter = 'brightness(1.2)'; this.style.transform = 'scale(1.02)'; };
                card.onmouseout = function() { this.style.filter = 'brightness(1)'; this.style.transform = 'scale(1)'; };
-               card.onclick = function() { 
-                   console.log('Manual UI Click detected on card:', label);
-                   window.applyAllureFilter(targets); 
-                };
+               card.onclick = function() { window.applyAllureFilter(targets); };
                card.innerHTML = '<div style="font-size:13px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; pointer-events:none;">' + label + '</div>' + 
                                 '<div style="font-size:28px; font-weight:bold; color:'+color+'; pointer-events:none;">' + (count || 0) + '</div>';
                return card;
