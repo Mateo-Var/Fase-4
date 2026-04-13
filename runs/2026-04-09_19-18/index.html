@@ -42,6 +42,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -100,45 +101,32 @@
 </style>
 
 <style id="qa-widget-layout">
-  /* Contenedor de widgets: columna única, ancho completo */
-  .content,
-  .content-wrapper,
-  .widget-grid,
-  [class*="overview"] > div,
-  .app__content > div { max-width: 100% !important; width: 100% !important; }
-
-  /* Cada widget visible: ocupa todo el ancho disponible */
-  .widget {
+  /* Forzar columna única en el contenedor principal de Allure */
+  .app__content {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Widgets y summary ocupan todo el ancho */
+  .widget, .summary {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
     margin: 0 0 16px 0 !important;
   }
 
-  /* Summary widget (donut + stats): también full-width */
-  .summary {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 1 1 100% !important;
-    box-sizing: border-box !important;
-    margin: 0 0 16px 0 !important;
-  }
-
-  .summary__chart { min-width: 220px !important; }
-  .summary__chart svg { width: 100% !important; }
-
-  /* Barras de suites más gruesas y legibles */
+  /* Barras de suites más visibles */
   .bar { height: 24px !important; border-radius: 4px !important; }
   .bar__fill { height: 24px !important; }
 
-  .widget__body table,
-  .widget__body .table { width: 100% !important; }
-
-  @media (max-width: 600px) {
-    .summary { flex-direction: column !important; }
-    .summary__chart { margin: 0 auto !important; }
-  }
+  .widget__body { width: 100% !important; }
 </style>
 
 <script id="qa-widget-hider">
@@ -150,14 +138,22 @@
     if (!widgets.length) return false;
 
     widgets.forEach(function (w) {
-      var titleEl = w.querySelector('.widget__title, .widget-title, [class*="title"]');
+      // Proteger el summary — nunca ocultarlo aunque tenga clase .widget
+      if (w.classList.contains('summary')) {
+        w.setAttribute('style', (w.getAttribute('style') || '') +
+          ';display:block!important;width:100%!important;max-width:100%!important;');
+        return;
+      }
+
+      // Solo buscar por .widget__title (selector específico, no genérico)
+      var titleEl = w.querySelector('.widget__title');
       var title   = titleEl ? titleEl.textContent.toLowerCase().trim() : '';
       var keep    = KEEP.some(function (k) { return title.indexOf(k) !== -1; });
 
-      if (keep) {
+      if (keep || title === '') {
         w.setAttribute('style', (w.getAttribute('style') || '') +
-          ';display:block!important;width:100%!important;max-width:100%!important;flex:1 1 100%!important;');
-      } else if (title !== '') {
+          ';display:block!important;width:100%!important;max-width:100%!important;');
+      } else {
         w.setAttribute('style', (w.getAttribute('style') || '') +
           ';display:none!important;');
       }
@@ -166,16 +162,13 @@
     var summary = document.querySelector('.summary');
     if (summary) {
       summary.setAttribute('style', (summary.getAttribute('style') || '') +
-        ';width:100%!important;max-width:100%!important;flex:1 1 100%!important;');
+        ';display:block!important;width:100%!important;max-width:100%!important;');
     }
 
     return true;
   }
 
-  var applied = false;
-  var observer = new MutationObserver(function () {
-    if (!applied && applyLayout()) applied = true;
-  });
+  var observer = new MutationObserver(function () { applyLayout(); });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
   [300, 700, 1500, 3000].forEach(function (t) { setTimeout(applyLayout, t); });
