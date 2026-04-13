@@ -57,6 +57,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -173,10 +174,9 @@
        if (parentContent) {
            parentContent.style.display = 'flex';
            parentContent.style.alignItems = 'center';
-           parentContent.style.justifyContent = 'flex-start';
+           parentContent.style.justifyContent = 'space-between';
            parentContent.style.width = '100%';
-           parentContent.style.gap = '60px'; 
-           parentContent.style.paddingLeft = '20px';
+           parentContent.style.gap = '30px'; 
        }
        
        fetch('widgets/summary.json').then(res => res.json()).then(data => {
@@ -185,9 +185,9 @@
             box.style.display = 'flex'; 
             box.style.flexDirection = 'column';
             box.style.justifyContent = 'center';
-            box.style.gap = '15px'; 
-            box.style.margin = '20px 0'; 
-            box.style.width = '280px';
+            box.style.gap = '16px'; 
+            box.style.margin = '10px 0'; 
+            box.style.flex = '1';
             
             function createCard(label, count, color, bg) {
                return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
@@ -199,6 +199,16 @@
             box.innerHTML = createCard('Total Casos', s.total, '#58a6ff', '#1f2428') +
                             createCard('Aprobados', s.passed, '#3fb950', '#1c2e22') +
                             createCard('Fallidos', fallidos, '#f85149', '#301c1c');
+            
+            // Mover el titulo fisicamente dentro de la caja para que este SIEMPRE arriba de las cards
+            if (title) {
+                title.style.margin = '0 0 15px 0';
+                title.style.padding = '0';
+                title.style.width = '100%';
+                title.style.textAlign = 'left';
+                box.insertBefore(title, box.firstChild);
+            }
+            
             statsNode.parentNode.insertBefore(box, statsNode);
        }).catch(e => console.log('Error', e));
     }
