@@ -64,6 +64,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -234,13 +235,23 @@
         
         leftCol.appendChild(box);
         
-        // 4. Mover la gráfica físicamente al lado derecho
+        // 4. Mover la gráfica físicamente al lado derecho y forzar su escala
         rightCol.appendChild(chartNode);
-        chartNode.style.setProperty('display', 'block', 'important');
+        chartNode.style.setProperty('display', 'flex', 'important');
+        chartNode.style.setProperty('justify-content', 'center', 'important');
+        chartNode.style.setProperty('align-items', 'center', 'important');
         chartNode.style.setProperty('width', '100%', 'important');
-        chartNode.style.setProperty('height', 'auto', 'important');
-        chartNode.style.setProperty('opacity', '1', 'important');
-        chartNode.style.setProperty('visibility', 'visible', 'important');
+        chartNode.style.setProperty('height', '300px', 'important');
+        chartNode.style.setProperty('overflow', 'visible', 'important');
+        
+        // Forzar al SVG interno a ser responsivo
+        var svg = chartNode.querySelector('svg');
+        if (svg) {
+            svg.style.setProperty('width', '100%', 'important');
+            svg.style.setProperty('height', '100%', 'important');
+            svg.style.setProperty('max-width', '250px', 'important'); 
+            svg.style.setProperty('max-height', '250px', 'important');
+        }
         
         // 5. Insertar todo el conjunto en el DOM
         statsNode.parentNode.insertBefore(mainWrapper, statsNode);
