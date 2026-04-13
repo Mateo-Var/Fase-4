@@ -55,58 +55,6 @@
 
 
 
-<script id="qa-custom-summary">
-(function () {
-  function modifySummary() {
-    var summary = document.querySelector('.widget[data-id="summary"]');
-    if (!summary) return;
-    
-    // Cambiar ALLURE REPORT a QA REPORT
-    var title = summary.querySelector('.widget__title');
-    if (title && title.innerHTML.includes('ALLURE REPORT')) {
-      title.innerHTML = title.innerHTML.replace('ALLURE REPORT', 'QA REPORT');
-    }
-    
-    // Crear cards de estadísticas
-    var statsNode = summary.querySelector('.summary-widget__stats');
-    if (statsNode && !statsNode.hasAttribute('data-customized')) {
-       statsNode.setAttribute('data-customized', 'true');
-       statsNode.style.display = 'none'; // ocultamos el original
-       
-       fetch('widgets/summary.json')
-         .then(res => res.json())
-         .then(data => {
-            var s = data.statistic;
-            var box = document.createElement('div');
-            box.style.display = 'flex';
-            box.style.gap = '15px';
-            box.style.marginTop = '25px';
-            box.style.marginBottom = '15px';
-            box.style.width = '65%';
-            
-            function createCard(label, count, color, bg) {
-               return '<div style="flex:1; background:'+bg+'; border:1px solid '+color+'; border-radius:10px; padding:18px 10px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
-                      '<div style="font-size:32px; font-weight:bold; color:'+color+'; line-height: 1;">' + (count || 0) + '</div>' +
-                      '<div style="font-size:13px; color:#c9d1d9; font-weight: 500; text-transform:uppercase; margin-top:8px; letter-spacing: 0.5px;">' + label + '</div>' +
-                      '</div>';
-            }
-            
-            var fallidos = (s.failed || 0) + (s.broken || 0);
-            var html = createCard('Total Casos', s.total, '#58a6ff', '#1f2428') +
-                       createCard('Aprobados', s.passed, '#3fb950', '#1c2e22') +
-                       createCard('Fallidos', fallidos, '#f85149', '#301c1c');
-            box.innerHTML = html;
-            statsNode.parentNode.insertBefore(box, statsNode);
-         }).catch(e => console.log('Error loading stats', e));
-    }
-  }
-  
-  var obs = new MutationObserver(modifySummary);
-  obs.observe(document.documentElement, { childList: true, subtree: true });
-  [100, 500, 1500, 3000].forEach(function(t) { setTimeout(modifySummary, t); });
-})();
-</script>
-
 
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
