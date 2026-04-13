@@ -51,6 +51,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -109,49 +110,49 @@
 </style>
 
 <style id="qa-widget-layout">
-  /* Forzar columna única full-width */
-  .app__content {
+  /* Forzar columna única full-width en la grilla nativa de Allure */
+  .widgets-grid {
     display: flex !important;
     flex-direction: column !important;
-    flex-wrap: nowrap !important;
-    align-items: stretch !important;
     width: 100% !important;
-    max-width: none !important;
-    padding: 10px 20px !important;
-    box-sizing: border-box !important;
+    margin: 0 !important;
   }
 
-  .app__content > * {
-    flex: 0 0 auto !important;
+  .widgets-grid__col {
     width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-    margin: 0 0 16px 0 !important;
+    flex: none !important;
+    max-width: 100% !important;
+    padding: 0 !important;
   }
 
+  .widget.island {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* Ocultar visualmente por CSS los widgets innecesarios */
+  .widget[data-id] { display: none !important; }
+  .widget[data-id="summary"], .widget[data-id="suites"] { display: block !important; }
+
+  /* Estilos internos de barras */
   .bar { height: 24px !important; border-radius: 4px !important; }
   .bar__fill { height: 24px !important; }
   .widget__body { width: 100% !important; box-sizing: border-box !important; }
-
 </style>
 
 <script id="qa-widget-hider">
 (function () {
   function removeUnwanted() {
     document.querySelectorAll('.widget').forEach(function (w) {
-      if (w.classList.contains('summary')) return;
-      var hasBars  = !!w.querySelector('.bar');
-      var title    = (w.querySelector('.widget__title') || {textContent: ''}).textContent.toLowerCase();
-      var isSuites = hasBars || title.indexOf('suite') !== -1;
-      if (!isSuites) w.remove();
-      else { w.style.width = '100%'; w.style.maxWidth = 'none'; }
+      if (w.getAttribute('data-id') !== 'summary' && w.getAttribute('data-id') !== 'suites') {
+        w.remove();
+      }
     });
-    var s = document.querySelector('.summary');
-    if (s) { s.style.width = '100%'; s.style.maxWidth = 'none'; }
   }
-  // Stubs cargan al instante → widgets renderizan en ~100ms, eliminar a los 200ms
-  [200, 600, 1500].forEach(function (t) { setTimeout(removeUnwanted, t); });
+  // Allure carga los widgets asincronamente
+  [100, 300, 800, 1500].forEach(function (t) { setTimeout(removeUnwanted, t); });
 })();
 </script>
 
