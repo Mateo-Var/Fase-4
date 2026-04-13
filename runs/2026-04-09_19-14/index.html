@@ -41,10 +41,10 @@
 </script>
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
-  /* Texto general — sobreescribe #000 y #333 hardcodeados en styles.css */
   .link { color: #58a6ff !important; }
   .table__row { color: #e6edf3 !important; }
   .tree__info { color: #e6edf3 !important; }
@@ -54,47 +54,33 @@
   .splash__subtitle { color: #8b949e !important; }
   .popover { background: #161b22 !important; color: #e6edf3 !important; border-color: #30363d !important; }
   .hljs { background: #1c2128 !important; color: #e6edf3 !important; }
-  /* Navegación lateral */
   .side-nav, .side-nav__list { background: #161b22 !important; border-color: #30363d !important; }
   .side-nav__item a, .side-nav__item span { color: #8b949e !important; }
   .side-nav__item.active a { color: #58a6ff !important; background: #1c2128 !important; }
-  /* Widgets y cards */
   .widget, .card, .summary, .chart-widget { background: #161b22 !important; border-color: #30363d !important; }
   .widget__title, .card__title { color: #8b949e !important; }
-  /* SVG text — por defecto fill es negro en SVG, sobreescribir globalmente */
-  svg text { fill: #8b949e !important; }
-  .y-axis text, .x-axis text { fill: #8b949e !important; }
-  .chart__legend-text, .summary-widget__stats span,
-  .widget__column span, .widget__flex-line span { color: #e6edf3 !important; }
-  /* Header */
+  .y-axis text, .x-axis text, .label { fill: #8b949e !important; }
   .header { background: #161b22 !important; border-bottom: 1px solid #30363d !important; }
   .header__name { color: #e6edf3 !important; }
-  /* Tabs */
   .tab, .tabs__tab { color: #8b949e !important; background: #161b22 !important; }
   .tab.active, .tabs__tab_active { color: #58a6ff !important; border-color: #58a6ff !important; }
-  /* Tablas */
   .table__row, tr { border-color: #21262d !important; }
   .table__row:hover, tr:hover { background: #1c2128 !important; }
-  /* Misc */
   .status-line { background: #161b22 !important; }
   .tag, .badge { background: #1c2128 !important; color: #8b949e !important; }
   a { color: #58a6ff !important; }
-  /* Estados de tests */
   .passed .status, .status_passed { color: #3fb950 !important; }
   .failed .status, .status_failed { color: #f85149 !important; }
-  .broken .status, .status_broken { color: #8b949e !important; }
+  .broken .status, .status_broken { color: #d29922 !important; }
   .skipped .status, .status_skipped { color: #8b949e !important; }
-  /* Broken → rojo en gráficas, barras, labels */
   .chart__fill_status_broken { fill: #f85149 !important; }
   .bar__fill_status_broken, .label_status_broken,
   .chart__legend-icon_status_broken, .y-label_status_broken { background: #f85149 !important; }
   .text_status_broken, .n-label_status_broken { color: #f85149 !important; }
-  /* Fondos claros en mensajes de error / detalle de test */
   .status-details_status_broken  { background: #1f1500 !important; border-color: #f85149 !important; }
   .status-details_status_failed  { background: #1f0000 !important; border-color: #f85149 !important; }
   .alert_status_broken  { background: #2a1c00 !important; color: #ffd050 !important; }
   .alert_status_failed  { background: #2d0a0a !important; color: #f85149 !important; }
-  /* Selección / hover en Suites y tablas */
   .table__row_active                          { background: #1c2128 !important; }
   .node__title_active, .node__title_active:before { background: #1c2128 !important; }
   .node__title:hover, .node__title:hover:before   { background: #21262d !important; }
@@ -104,6 +90,7 @@
   .island               { background: #161b22 !important; border-color: #30363d !important; }
   .attachment__text-container_fullscreen,
   .attachment__iframe_fullscreen { background: #0d1117 !important; }
+  /* Ocultar todas las entradas del sidebar excepto Vista General */
   .side-nav__item:has(a[href="#suites"]),
   .side-nav__item:has(a[href="#categories"]),
   .side-nav__item:has(a[href="#graph"]),
@@ -111,6 +98,89 @@
   .side-nav__item:has(a[href="#behaviors"]),
   .side-nav__item:has(a[href="#packages"]) { display: none !important; }
 </style>
+
+<style id="qa-widget-layout">
+  /* Contenedor de widgets: columna única, ancho completo */
+  .content,
+  .content-wrapper,
+  .widget-grid,
+  [class*="overview"] > div,
+  .app__content > div { max-width: 100% !important; width: 100% !important; }
+
+  /* Cada widget visible: ocupa todo el ancho disponible */
+  .widget {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 0 16px 0 !important;
+  }
+
+  /* Summary widget (donut + stats): también full-width */
+  .summary {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 0 16px 0 !important;
+  }
+
+  .summary__chart { min-width: 220px !important; }
+  .summary__chart svg { width: 100% !important; }
+
+  /* Barras de suites más gruesas y legibles */
+  .bar { height: 24px !important; border-radius: 4px !important; }
+  .bar__fill { height: 24px !important; }
+
+  .widget__body table,
+  .widget__body .table { width: 100% !important; }
+
+  @media (max-width: 600px) {
+    .summary { flex-direction: column !important; }
+    .summary__chart { margin: 0 auto !important; }
+  }
+</style>
+
+<script id="qa-widget-hider">
+(function () {
+  var KEEP = ['suites', 'suite'];
+
+  function applyLayout() {
+    var widgets = document.querySelectorAll('.widget');
+    if (!widgets.length) return false;
+
+    widgets.forEach(function (w) {
+      var titleEl = w.querySelector('.widget__title, .widget-title, [class*="title"]');
+      var title   = titleEl ? titleEl.textContent.toLowerCase().trim() : '';
+      var keep    = KEEP.some(function (k) { return title.indexOf(k) !== -1; });
+
+      if (keep) {
+        w.setAttribute('style', (w.getAttribute('style') || '') +
+          ';display:block!important;width:100%!important;max-width:100%!important;flex:1 1 100%!important;');
+      } else if (title !== '') {
+        w.setAttribute('style', (w.getAttribute('style') || '') +
+          ';display:none!important;');
+      }
+    });
+
+    var summary = document.querySelector('.summary');
+    if (summary) {
+      summary.setAttribute('style', (summary.getAttribute('style') || '') +
+        ';width:100%!important;max-width:100%!important;flex:1 1 100%!important;');
+    }
+
+    return true;
+  }
+
+  var applied = false;
+  var observer = new MutationObserver(function () {
+    if (!applied && applyLayout()) applied = true;
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+  [300, 700, 1500, 3000].forEach(function (t) { setTimeout(applyLayout, t); });
+})();
+</script>
 </head>
 <body>
     <div id="alert"></div>
