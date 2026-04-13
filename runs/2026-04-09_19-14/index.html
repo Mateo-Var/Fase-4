@@ -50,6 +50,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -132,32 +133,25 @@
   .bar { height: 24px !important; border-radius: 4px !important; }
   .bar__fill { height: 24px !important; }
   .widget__body { width: 100% !important; box-sizing: border-box !important; }
+
 </style>
 
 <script id="qa-widget-hider">
 (function () {
-  function clean() {
-    var summary = document.querySelector('.summary');
-    if (!summary || summary.querySelector('.spinner')) return;
-
+  function removeUnwanted() {
     document.querySelectorAll('.widget').forEach(function (w) {
       if (w.classList.contains('summary')) return;
-      var titleEl = w.querySelector('.widget__title');
-      var title   = titleEl ? titleEl.textContent.toLowerCase().trim() : '';
-      var isSuites = title.indexOf('suite') !== -1 || w.querySelector('.bar') !== null;
-      if (!isSuites) {
-        w.parentNode && w.parentNode.removeChild(w);
-      } else {
-        w.style.width = '100%';
-        w.style.maxWidth = 'none';
-      }
+      var hasBars  = !!w.querySelector('.bar');
+      var title    = (w.querySelector('.widget__title') || {textContent: ''}).textContent.toLowerCase();
+      var isSuites = hasBars || title.indexOf('suite') !== -1;
+      if (!isSuites) w.remove();
+      else { w.style.width = '100%'; w.style.maxWidth = 'none'; }
     });
-
-    summary.style.width = '100%';
-    summary.style.maxWidth = 'none';
+    var s = document.querySelector('.summary');
+    if (s) { s.style.width = '100%'; s.style.maxWidth = 'none'; }
   }
-
-  [800, 1800, 3500, 6000].forEach(function (t) { setTimeout(clean, t); });
+  // Stubs cargan al instante → widgets renderizan en ~100ms, eliminar a los 200ms
+  [200, 600, 1500].forEach(function (t) { setTimeout(removeUnwanted, t); });
 })();
 </script>
 
