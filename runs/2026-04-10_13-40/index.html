@@ -59,6 +59,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -183,8 +184,11 @@
        
        var chartNode = summary.querySelector('.summary-widget__chart');
        if (chartNode) {
-           chartNode.style.flex = '0 0 auto';
-           chartNode.style.marginRight = '20px'; // Beautiful safe space for the chart
+           chartNode.style.flex = 'none';
+           chartNode.style.width = '30%';
+           chartNode.style.minWidth = '200px';
+           chartNode.style.display = 'flex';
+           chartNode.style.justifyContent = 'center';
        }
        
        fetch('widgets/summary.json').then(res => res.json()).then(data => {
@@ -193,9 +197,9 @@
             box.style.display = 'flex'; 
             box.style.flexDirection = 'column';
             box.style.justifyContent = 'center';
-            box.style.gap = '16px'; 
+            box.style.gap = '15px'; 
             box.style.margin = '10px 0'; 
-            box.style.flex = '1';
+            box.style.width = '65%';
             
             function createCard(label, count, color, bg) {
                return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
