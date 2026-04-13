@@ -72,6 +72,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -179,7 +180,7 @@
         var st = document.createElement('style');
         st.id = styleId;
         st.innerHTML = '.widget[data-id="summary"] .summary-widget { display: flex !important; flex-direction: row !important; width: 100% !important; gap: 40px !important; align-items: flex-start !important; padding: 10px 0 !important; } ' +
-                       '.widget[data-id="summary"] .summary-widget__stats { display: flex !important; flex-direction: column !important; width: 50% !important; flex: 1 !important; min-width: 0 !important; margin: 0 !important; justify-content: center !important; min-height: 300px !important; } ' +
+                       '.widget[data-id="summary"] .summary-widget__stats { display: flex !important; flex-direction: column !important; width: 50% !important; flex: 1 !important; min-width: 0 !important; margin: 0 !important; justify-content: center !important; align-items: center !important; min-height: 300px !important; } ' +
                        '.widget[data-id="summary"] .summary-widget__chart { display: block !important; width: 50% !important; flex: 1 !important; min-height: 300px !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; border: none !important; } ' +
                        '.widget[data-id="summary"] .summary-widget__chart svg { width: 100% !important; height: 100% !important; max-width: 280px !important; max-height: 280px !important; display: block !important; margin: 0 auto !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; } ' +
                        '@media (max-width: 768px) { .widget[data-id="summary"] .summary-widget { flex-direction: column !important; } .widget[data-id="summary"] .summary-widget__stats, .widget[data-id="summary"] .summary-widget__chart { width: 100% !important; } }';
@@ -197,21 +198,37 @@
             }
         });
         
-        // 2. Preparar Título
+        // 2. Preparar Título (Vacío inicial, se llena con el fetch)
         var title = summary.querySelector('.widget__title');
         if (title) {
-            title.innerHTML = 'QA REPORT';
-            title.style.cssText = 'margin: 0 0 15px 0 !important; text-align: left !important; width: 100% !important; display: block !important; font-weight: bold !important; color: #8b949e !important;';
+            title.style.cssText = 'margin: 0 !important; text-align: center !important; width: 100% !important; display: block !important; font-weight: bold !important; color: #8b949e !important; font-size: 20px !important;';
         }
 
         // 3. Inyectar Contenedor de Cards
         var customBox = document.createElement('div');
         customBox.className = 'qa-custom-box';
-        customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; margin: 0 !important;";
+        customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; max-width: 280px !important; margin: 0 !important;";
         statsNode.appendChild(customBox);
 
         fetch('widgets/summary.json').then(res => res.json()).then(data => {
             var s = data.statistic;
+            var t = data.time;
+            
+            // Formatear Fecha y Hora
+            var stDate = new Date(t.start);
+            var dateStr = stDate.getDate() + '/' + (stDate.getMonth() + 1) + '/' + stDate.getFullYear();
+            var startStr = stDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            var endStr = new Date(t.stop).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            var durStr = Math.floor(t.duration / 60000) + 'm ' + Math.floor((t.duration % 60000) / 1000) + 's';
+            
+            if (title) {
+                title.innerHTML = 'QA REPORT ' + dateStr;
+                var sub = document.createElement('div');
+                sub.style.cssText = 'color: #8b949e; font-size: 13px; margin: 5px 0 20px 0; font-weight: normal;';
+                sub.innerHTML = startStr + ' - ' + endStr + ' (' + durStr + ')';
+                title.after(sub);
+            }
+
             function createCard(label, count, color, bg) {
                return '<div style="background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">' +
                       '<div style="font-size:13px; color:#c9d1d9; font-weight: 600; text-transform:uppercase; letter-spacing: 0.5px; white-space: nowrap;">' + label + '</div>' + 
