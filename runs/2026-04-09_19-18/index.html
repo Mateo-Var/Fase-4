@@ -77,6 +77,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -344,16 +345,16 @@
   [50, 200, 600, 1500].forEach(function(t) { setTimeout(replaceLogo, t); });
 })();
 </script>
-<script id="qa-custom-summary-v8">
+<script id="qa-custom-summary-v9">
 (function () {
-  const VERSION = 'V8';
+  const VERSION = 'V9';
   function addVersionBadge() {
-    var bId = 'qa-version-badge-v8';
+    var bId = 'qa-version-badge-v9';
     if (document.getElementById(bId)) return;
     var b = document.createElement('div');
     b.id = bId;
-    b.style.cssText = 'position:fixed; bottom:10px; right:10px; background:rgba(0,0,0,0.8); color:#3fb950; padding:5px 12px; border-radius:5px; font-family:monospace; font-size:11px; z-index:99999; border:2px solid #3fb950; font-weight:bold;';
-    b.innerHTML = 'QA TOOLS ' + VERSION + ' - CLEAN DEPLOYMENT';
+    b.style.cssText = 'position:fixed; bottom:10px; right:12px; background:rgba(0,0,0,0.85); color:#3fb950; padding:6px 14px; border-radius:6px; font-family:monospace; font-size:11px; z-index:999999; border:2px solid #3fb950; font-weight:bold; box-shadow:0 0 10px rgba(63,185,80,0.3);';
+    b.innerHTML = 'QA TOOLS ' + VERSION + ' - FORCE CLICK ACTIVE';
     document.body.appendChild(b);
   }
 
@@ -363,13 +364,22 @@
     location.hash = '#suites';
   };
 
+  function forceClick(el) {
+      if (!el) return;
+      try {
+          el.click();
+          var ev = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
+          el.dispatchEvent(ev);
+      } catch(e) {}
+  }
+
   function executeFilterLogic() {
     var raw = sessionStorage.getItem('qa_target_filter');
     if (!raw || location.hash.indexOf('#suites') === -1) return;
-    var targets = JSON.parse(raw);
     var container = document.querySelector('.status-toggle');
     if (!container) return;
     
+    var targets = JSON.parse(raw);
     sessionStorage.removeItem('qa_target_filter');
     console.log('QA Dashboard ' + VERSION + ': Applying filter intent', targets);
     
@@ -377,15 +387,20 @@
     statuses.forEach(function(st, idx) {
         setTimeout(function() {
             var btn = document.querySelector('.status-toggle__item_status_' + st);
-            if (btn) {
-                var isActive = btn.classList.contains('status-toggle__item_active');
-                var shouldBeActive = targets.includes(st) || targets.includes('all');
-                if (isActive !== shouldBeActive) {
-                    console.log('QA Dashboard ' + VERSION + ': Toggling', st);
-                    btn.dispatchEvent(new MouseEvent('click', { view: window, bubbles: true, cancelable: true }));
-                }
+            if (!btn) return;
+            var isActive = btn.classList.contains('status-toggle__item_active');
+            var shouldBeActive = targets.includes(st) || targets.includes('all');
+            if (isActive !== shouldBeActive) {
+                console.log('QA Dashboard ' + VERSION + ': Toggling', st);
+                forceClick(btn);
+                setTimeout(function() {
+                    var btnR = document.querySelector('.status-toggle__item_status_' + st);
+                    if (btnR && btnR.classList.contains('status-toggle__item_active') !== shouldBeActive) {
+                        forceClick(btnR);
+                    }
+                }, 200);
             }
-        }, idx * 100);
+        }, idx * 200);
     });
   }
 
@@ -393,10 +408,10 @@
     addVersionBadge();
     executeFilterLogic();
     var summary = document.querySelector('.widget[data-id="summary"]');
-    if (!summary || summary.hasAttribute('data-customized-v8')) return;
-    summary.setAttribute('data-customized-v8', 'true');
+    if (!summary || summary.hasAttribute('data-customized-v9')) return;
+    summary.setAttribute('data-customized-v9', 'true');
 
-    var styleId = 'qa-layout-fix-v8';
+    var styleId = 'qa-layout-fix-v9';
     if (!document.getElementById(styleId)) {
         var st = document.createElement('style');
         st.id = styleId;
@@ -420,10 +435,10 @@
         }
 
         var wrapper = document.createElement('div');
-        wrapper.className = 'qa-custom-wrapper-v8';
+        wrapper.className = 'qa-custom-wrapper-v9';
         wrapper.style.cssText = "width: 100%; display: flex; justify-content: center; margin: 0; padding: 0;";
         var customBox = document.createElement('div');
-        customBox.className = 'qa-custom-box-v8';
+        customBox.className = 'qa-custom-box-v9';
         customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; max-width: 280px !important; margin: 0 auto !important;";
         wrapper.appendChild(customBox);
         statsNode.appendChild(wrapper);
@@ -440,7 +455,7 @@
             if (title) {
                 title.innerHTML = 'QA REPORT ' + dateStr;
                 var sub = document.createElement('div');
-                sub.className = 'qa-sub-v8';
+                sub.className = 'qa-sub-v9';
                 sub.style.cssText = 'color: #8b949e; font-size: 13px; margin: 5px 0 20px 0 !important; font-weight: normal; text-align: center !important; width: 100% !important; display: block !important;';
                 sub.innerHTML = startStr + ' - ' + endStr + ' (' + durStr + ')';
                 title.after(sub);
@@ -448,8 +463,8 @@
 
             function createCard(label, count, color, bg, targets) {
                var card = document.createElement('div');
-               card.className = 'qa-card-v8';
-               card.style.cssText = 'background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.2s;';
+               card.className = 'qa-card-v9';
+               card.style.cssText = 'background:'+bg+'; border: 1px solid #30363d; border-left: 8px solid '+color+'; border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s;';
                card.onmouseover = function() { this.style.filter = 'brightness(1.2)'; this.style.transform = 'scale(1.02)'; };
                card.onmouseout = function() { this.style.filter = 'brightness(1)'; this.style.transform = 'scale(1)'; };
                card.onclick = function() { window.applyAllureFilter(targets); };
@@ -463,7 +478,7 @@
             customBox.appendChild(createCard('Aprobados', s.passed, '#3fb950', '#1c2e22', ['passed']));
             customBox.appendChild(createCard('Fallidos', fallCount, '#f85149', '#301c1c', ['failed', 'broken']));
             [100, 500, 1500].forEach(function(ti) { setTimeout(function() { window.dispatchEvent(new Event('resize')); }, ti); });
-        }).catch(e => console.log('Error QA Dashboard:', e));
+        }).catch(e => console.log('Error QA Summary:', e));
     }
   }
 
