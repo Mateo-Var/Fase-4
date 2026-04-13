@@ -70,6 +70,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -171,15 +172,15 @@
     var summary = document.querySelector('.widget[data-id="summary"]');
     if (!summary) return;
     
-    // 1. Inyectar Estilos Globales (Forma ultra-segura sin backticks anidados)
+    // 1. Inyectar Estilos Globales (Forma ultra-segura)
     var styleId = 'qa-layout-fix';
     if (!document.getElementById(styleId)) {
         var st = document.createElement('style');
         st.id = styleId;
-        st.innerHTML = '.widget[data-id="summary"] .summary-widget { display: flex !important; flex-direction: row !important; width: 100% !important; gap: 30px !important; align-items: flex-start !important; justify-content: space-between !important; padding: 10px 0 !important; overflow: visible !important; } ' +
-                       '.widget[data-id="summary"] .summary-widget__stats { display: flex !important; flex-direction: column !important; width: 45% !important; flex: none !important; min-width: 0 !important; padding: 0 !important; margin: 0 !important; } ' +
-                       '.widget[data-id="summary"] .summary-widget__chart { display: flex !important; width: 50% !important; flex: none !important; min-height: 280px !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; justify-content: center !important; align-items: center !important; } ' +
-                       '.widget[data-id="summary"] .summary-widget__chart svg { width: 100% !important; height: auto !important; max-width: 300px !important; display: block !important; margin: auto !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; } ' +
+        st.innerHTML = '.widget[data-id="summary"] .summary-widget { display: flex !important; flex-direction: row !important; width: 100% !important; gap: 40px !important; align-items: flex-start !important; padding: 10px 0 !important; } ' +
+                       '.widget[data-id="summary"] .summary-widget__stats { display: flex !important; flex-direction: column !important; width: 50% !important; flex: 1 !important; min-width: 0 !important; margin: 0 !important; } ' +
+                       '.widget[data-id="summary"] .summary-widget__chart { display: block !important; width: 50% !important; flex: 1 !important; min-height: 300px !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; border: none !important; } ' +
+                       '.widget[data-id="summary"] .summary-widget__chart svg { width: 100% !important; height: 100% !important; max-width: 280px !important; max-height: 280px !important; display: block !important; margin: 0 auto !important; visibility: visible !important; opacity: 1 !important; overflow: visible !important; } ' +
                        '@media (max-width: 768px) { .widget[data-id="summary"] .summary-widget { flex-direction: column !important; } .widget[data-id="summary"] .summary-widget__stats, .widget[data-id="summary"] .summary-widget__chart { width: 100% !important; } }';
         document.head.appendChild(st);
     }
@@ -199,13 +200,13 @@
         var title = summary.querySelector('.widget__title');
         if (title) {
             title.innerHTML = 'QA REPORT';
-            title.style.cssText = 'margin: 0 0 10px 0 !important; text-align: left !important; width: 100% !important; display: block !important; padding: 0 !important; font-weight: bold !important;';
+            title.style.cssText = 'margin: 0 0 15px 0 !important; text-align: left !important; width: 100% !important; display: block !important; font-weight: bold !important; color: #8b949e !important;';
         }
 
         // 3. Inyectar Contenedor de Cards
         var customBox = document.createElement('div');
         customBox.className = 'qa-custom-box';
-        customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 10px !important; width: 100% !important; margin: 0 !important; padding: 0 !important;";
+        customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; margin: 0 !important;";
         statsNode.appendChild(customBox);
 
         fetch('widgets/summary.json').then(res => res.json()).then(data => {
