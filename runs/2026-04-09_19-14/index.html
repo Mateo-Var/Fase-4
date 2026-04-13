@@ -75,6 +75,7 @@
 
 
 
+
 <style id="qa-dark-override">
   :root { color-scheme: dark; }
   body, .app { background: #0d1117 !important; color: #e6edf3 !important; }
@@ -170,14 +171,14 @@
 })();
 </script>
 
-<script id="qa-custom-summary">
+<script id="qa-custom-summary-v3">
 (function () {
   function modifySummary() {
     var summary = document.querySelector('.widget[data-id="summary"]');
     if (!summary) return;
     
-    // 1. Inyectar Estilos Globales (Forma ultra-segura)
-    var styleId = 'qa-layout-fix';
+    // 1. Inyectar Estilos Globales (Cache Bypass v3)
+    var styleId = 'qa-layout-fix-v3';
     if (!document.getElementById(styleId)) {
         var st = document.createElement('style');
         st.id = styleId;
@@ -190,8 +191,8 @@
     }
 
     var statsNode = summary.querySelector('.summary-widget__stats');
-    if (statsNode && !statsNode.hasAttribute('data-customized')) {
-        statsNode.setAttribute('data-customized', 'true');
+    if (statsNode && !statsNode.hasAttribute('data-customized-v3')) {
+        statsNode.setAttribute('data-customized-v3', 'true');
         
         // Estrategia NO destructiva
         Array.from(statsNode.children).forEach(function(child) {
@@ -200,17 +201,22 @@
             }
         });
         
-        // 2. Preparar Título (Vacío inicial, se llena con el fetch)
+        // 2. Preparar Título y Subtítulo
         var title = summary.querySelector('.widget__title');
         if (title) {
             title.style.cssText = 'margin: 0 !important; text-align: center !important; width: 100% !important; display: block !important; font-weight: bold !important; color: #8b949e !important; font-size: 20px !important;';
         }
 
-        // 3. Inyectar Contenedor de Cards
+        // 3. Inyectar Contenedor de Cards con Envoltura de Centrado
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = "width: 100%; display: flex; justify-content: center; margin: 0; padding: 0;";
+        
         var customBox = document.createElement('div');
         customBox.className = 'qa-custom-box';
         customBox.style.cssText = "display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100% !important; max-width: 280px !important; margin: 0 auto !important;";
-        statsNode.appendChild(customBox);
+        
+        wrapper.appendChild(customBox);
+        statsNode.appendChild(wrapper);
 
         fetch('widgets/summary.json').then(res => res.json()).then(data => {
             var s = data.statistic;
@@ -225,10 +231,14 @@
             
             if (title) {
                 title.innerHTML = 'QA REPORT ' + dateStr;
-                var sub = document.createElement('div');
-                sub.style.cssText = 'color: #8b949e; font-size: 13px; margin: 5px 0 20px 0 !important; font-weight: normal; text-align: center !important; width: 100% !important; display: block !important;';
-                sub.innerHTML = startStr + ' - ' + endStr + ' (' + durStr + ')';
-                title.after(sub);
+                var subId = 'qa-sub-v3';
+                if (!document.getElementById(subId)) {
+                    var sub = document.createElement('div');
+                    sub.id = subId;
+                    sub.style.cssText = 'color: #8b949e; font-size: 13px; margin: 5px 0 20px 0 !important; font-weight: normal; text-align: center !important; width: 100% !important; display: block !important;';
+                    sub.innerHTML = startStr + ' - ' + endStr + ' (' + durStr + ')';
+                    title.after(sub);
+                }
             }
 
             function createCard(label, count, color, bg) {
@@ -243,14 +253,14 @@
                                   createCard('Aprobados', s.passed, '#3fb950', '#1c2e22') +
                                   createCard('Fallidos', fallidos, '#f85149', '#301c1c');
             
-            // Forzar recálculo múltiple para la gráfica
+            console.log('QA Dashboard v3: Cards injected as centered block.');
             [100, 500, 1500].forEach(function(t) {
                 setTimeout(function() { window.dispatchEvent(new Event('resize')); }, t);
             });
         }).catch(e => console.log('Error QA Report:', e));
     }
   }
-  console.log('QA Dashboard: Script running...');
+  console.log('QA Dashboard v3: Script running...');
   var obs = new MutationObserver(modifySummary);
   obs.observe(document.documentElement, { childList: true, subtree: true });
   [100, 500, 1500, 3000].forEach(function(t) { setTimeout(modifySummary, t); });
