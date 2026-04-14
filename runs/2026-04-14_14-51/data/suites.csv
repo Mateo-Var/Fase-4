@@ -1,0 +1,7 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","5602","deberia tapear CERRAR SESION via ADB bounds","Flujo de Logout","2026-04-14","passed","2026-04-14","","","",""
+"","64129","deberia estar autenticado antes de probar el logout","Flujo de Logout","2026-04-14","passed","2026-04-14","","","",""
+"","7276","deberia mostrar el menu autenticado con la opcion de cerrar sesion","Flujo de Logout","2026-04-14","passed","2026-04-14","","","",""
+"","4841","deberia redirigir a la pantalla de login tras el logout","Flujo de Logout","2026-04-14","passed","2026-04-14","","","",""
+"","4254","deberia eliminar el menu autenticado tras el logout","Flujo de Logout","2026-04-14","passed","2026-04-14","","","",""
+"","14389","deberia tener la app abierta","Flujo de Logout","2026-04-14","passed","2026-04-14","","","",""
