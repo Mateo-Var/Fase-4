@@ -7,7 +7,7 @@
  * Interacción por texto visible, sin hardcodear posiciones, testIDs ni labels fijos.
  */
 
-const { screenshot, tapMenuTab, pageContains, waitForText, waitForErrorMessage, tapSubmitButton, tapPasswordToggle, hideKeyboard, isAuthenticatedMenuVisible } = require('../../utils/helpers')
+const { screenshot, tapMenuTab, pageContains, waitForText, waitForErrorMessage, tapSubmitButton, tapPasswordToggle, hideKeyboard, isAuthenticatedMenuVisible, dismissPromoPopupIfVisible } = require('../../utils/helpers')
 const LoginPage = require('../../pageobjects/login.page')
 
 const EMAIL    = process.env.TEST_EMAIL
@@ -159,6 +159,36 @@ describe('Flujo de Login', () => {
     await browser.pause(1500)
     await screenshot('03_esperando_login')
 
+    // Si la app arrancó con sesión activa, el tab de Menú muestra el menú
+    // autenticado en lugar del formulario de login — hay que cerrar sesión primero.
+    const autenticado = await isAuthenticatedMenuVisible()
+    if (autenticado) {
+      console.log('  [test #3] Sesión activa detectada — cerrando sesión antes de esperar login...')
+      const src = await browser.getPageSource()
+      const logoutLabels = ['CERRAR SESIÓN', 'Cerrar sesión', 'CERRAR SESION', 'Cerrar sesion', 'LOGOUT', 'Logout', 'SALIR', 'Salir']
+      let logoutTapped = false
+      for (const label of logoutLabels) {
+        const idx = src.indexOf(label)
+        if (idx === -1) continue
+        const tagStart = src.lastIndexOf('<', idx)
+        const tagEnd   = src.indexOf('>', idx)
+        if (tagStart === -1 || tagEnd === -1) continue
+        const tag = src.slice(tagStart, tagEnd + 1)
+        const b = tag.match(/bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/)
+        if (!b) continue
+        const x = Math.round((+b[1] + +b[3]) / 2)
+        const y = Math.round((+b[2] + +b[4]) / 2)
+        const { execSync } = require('child_process')
+        execSync(`adb -s ${process.env.DEVICE_NAME || '192.168.1.193:5555'} shell input tap ${x} ${y}`, { timeout: 5000 })
+        console.log(`  [test #3] "${label}" tapeado → tap (${x}, ${y})`)
+        logoutTapped = true
+        break
+      }
+      if (!logoutTapped) throw new Error('[test #3] Sesión activa pero no se encontró botón de logout')
+      await browser.pause(3000)
+      await screenshot('03_tras_logout')
+    }
+
     await LoginPage.waitUntilVisible(45000)
     await screenshot('03_login_visible')
 
@@ -236,6 +266,10 @@ describe('Flujo de Login', () => {
     await screenshot('07_submit_presionado')
 
     await browser.pause(5000)
+
+    // Cerrar popup publicitario si apareció al llegar al home post-login
+    await dismissPromoPopupIfVisible()
+
     await screenshot('07_resultado_login')
   })
 

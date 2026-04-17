@@ -8,7 +8,7 @@
  * 03 - Analizar los primeros 2 componentes y seleccionar un show
  */
 
-const { screenshot } = require('../../utils/helpers')
+const { screenshot, dismissPromoPopupIfVisible } = require('../../utils/helpers')
 const { execSync }   = require('child_process')
 
 const APP_ID = process.env.APP_PACKAGE || 'com.azteca.live'
@@ -107,6 +107,10 @@ describe('Explorar → Videos', () => {
   // ─── 01. Navegar a Explorar ───────────────────────────────────────────────
   it('01 - Navegar al tab Explorar desde el nav bar', async () => {
     await normalizarEstadoApp()
+
+    // Cerrar popup publicitario si apareció al llegar al home
+    await dismissPromoPopupIfVisible()
+
     await screenshot('explorar_01_estado_inicial')
 
     // Buscar "Explorar" en el nav bar y tapearlo

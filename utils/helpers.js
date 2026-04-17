@@ -404,6 +404,99 @@ async function isAuthenticatedMenuVisible() {
   } catch (_) { return false }
 }
 
+// ─── ensureAppInForeground ───────────────────────────────────────────────────
+/**
+ * Verifica que la app objetivo esté en primer plano y la relanza si no lo está.
+ *
+ * Estrategia:
+ *   1. Obtiene el package activo via browser.getCurrentPackage()
+ *   2. Compara contra APP_PACKAGE (process.env)
+ *   3. Si no coincide: intenta activateApp(), fallback a ADB am start
+ *   4. Espera 2s tras el relanzamiento para que la app cargue
+ *
+ * Defensivo: loguea y continúa — nunca rompe el test.
+ *
+ * @returns {boolean} true si la app estaba o quedó en primer plano, false si no se pudo verificar
+ */
+async function ensureAppInForeground() {
+  const pkg = process.env.APP_PACKAGE
+  if (!pkg) {
+    console.log('  [ensureAppInForeground] APP_PACKAGE no definido — skip')
+    return false
+  }
+
+  try {
+    const currentPkg = await browser.getCurrentPackage()
+    if (currentPkg === pkg) {
+      console.log(`  [ensureAppInForeground] app en primer plano: ${currentPkg}`)
+      return true
+    }
+
+    console.log(`  [ensureAppInForeground] paquete activo: "${currentPkg}" — esperado: "${pkg}" — relanzando...`)
+
+    // Intento 1: API de Appium (más limpia, preserva estado si noReset=true)
+    try {
+      await driver.activateApp(pkg)
+      await browser.pause(2000)
+      const afterActivate = await browser.getCurrentPackage()
+      if (afterActivate === pkg) {
+        console.log(`  [ensureAppInForeground] app relanzada via activateApp`)
+        return true
+      }
+    } catch (activateErr) {
+      console.log(`  [ensureAppInForeground] activateApp falló: ${activateErr.message?.split('\n')[0]} — intentando ADB`)
+    }
+
+    // Intento 2: ADB am start (fallback para MIUI donde activateApp puede fallar)
+    const activity = process.env.APP_ACTIVITY
+    if (activity) {
+      execSync(`adb -s ${getDevice()} shell am start -n ${pkg}/${activity}`, { timeout: 10000 })
+      await browser.pause(2000)
+      console.log(`  [ensureAppInForeground] app relanzada via ADB am start`)
+      return true
+    }
+
+    console.log('  [ensureAppInForeground] APP_ACTIVITY no definido — no se puede usar ADB fallback')
+    return false
+  } catch (err) {
+    console.log(`  [ensureAppInForeground] error al verificar/relanzar app: ${err.message?.split('\n')[0]} — continuando`)
+    return false
+  }
+}
+
+// ─── dismissPromoPopupIfVisible ──────────────────────────────────────────────
+/**
+ * Cierra el popup publicitario in-app si está visible, tapeando "OMITIR".
+ *
+ * Regla de negocio: SIEMPRE omitir — nunca tapear "ABRIR".
+ * Defensivo: no lanza error si el popup no aparece.
+ *
+ * @returns {boolean} true si el popup fue encontrado y cerrado, false si no estaba presente
+ */
+async function dismissPromoPopupIfVisible() {
+  try {
+    const src = await browser.getPageSource()
+    if (!src.includes('OMITIR')) return false
+
+    // Extraer bounds del tag que contiene "OMITIR"
+    const idx = src.indexOf('OMITIR')
+    const tagStart = src.lastIndexOf('<', idx)
+    const tagEnd   = src.indexOf('>', idx)
+    if (tagStart === -1 || tagEnd === -1) return false
+
+    const tag = src.slice(tagStart, tagEnd + 1)
+    const b   = tag.match(/bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/)
+    if (!b) return false
+
+    const x = Math.round((+b[1] + +b[3]) / 2)
+    const y = Math.round((+b[2] + +b[4]) / 2)
+    console.log(`  [dismissPromoPopup] popup publicitario detectado → tap OMITIR (${x}, ${y})`)
+    execSync(`adb -s ${getDevice()} shell input tap ${x} ${y}`, { timeout: 5000 })
+    await browser.pause(500)
+    return true
+  } catch (_) { return false }
+}
+
 // ─── waitForEnabled ───────────────────────────────────────────────────────────
 async function waitForEnabled(selector, timeout = 10000) {
   const el = await $(selector)
@@ -418,6 +511,8 @@ module.exports = {
   tapMenuTab,
   tapSubmitButton,
   tapPasswordToggle,
+  ensureAppInForeground,
+  dismissPromoPopupIfVisible,
   waitForErrorMessage,
   isAuthenticatedMenuVisible,
   pageContains,

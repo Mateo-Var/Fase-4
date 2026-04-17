@@ -11,7 +11,7 @@
  *   - Early exit por contenido sin cambios
  */
 
-const { screenshot } = require('../../utils/helpers')
+const { screenshot, dismissPromoPopupIfVisible } = require('../../utils/helpers')
 const { execSync }   = require('child_process')
 
 function getDevice() {
@@ -118,6 +118,10 @@ describe('Navegación — Home', () => {
     // Tap directo al tab Inicio sin getPageSource — siempre está en la esquina inferior izquierda
     adbTap(135, 2222)
     await browser.pause(1500)
+
+    // Cerrar popup publicitario si apareció al llegar al home
+    await dismissPromoPopupIfVisible()
+
     await screenshot('00_home')
     console.log('  ✓ En el Home')
   })

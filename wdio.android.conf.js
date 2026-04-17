@@ -22,6 +22,14 @@ require('dotenv').config()
  *   npx wdio wdio.android.conf.js
  */
 
+// RUN_TS se fija una sola vez en el proceso principal y se comparte via env var
+// para que el worker use exactamente el mismo timestamp que onComplete
+if (!process.env.WDIO_RUN_TS) {
+  process.env.WDIO_RUN_TS = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+}
+const RUN_TS   = process.env.WDIO_RUN_TS
+const ALLURE_OUT = `./reports/allure-runs/allure-results-${RUN_TS}`
+
 exports.config = {
   // ─── Appium server ──────────────────────────────────────────────────────────
   hostname: '127.0.0.1',
@@ -32,15 +40,49 @@ exports.config = {
   runner: 'local',
 
   // ─── Specs ──────────────────────────────────────────────────────────────────
+  // Array anidado = misma sesión Appium para todos los specs.
+  // Para correr un subconjunto usar: --suite <nombre>
   specs: [
     [
       './tests/e2e/login-test.js',
       './tests/e2e/home-navegacion-test.js',
       './tests/e2e/hero_EPG-test.js',
       './tests/e2e/navegacion_vod-test.js',
+      './tests/e2e/logout-test.js',
     ]
   ],
   exclude: [],
+
+  // ─── Suites ─────────────────────────────────────────────────────────────────
+  // Uso: npx wdio wdio.android.conf.js --suite <nombre>
+  suites: {
+    // ── Individuales ──────────────────────────────────────────────────────────
+    login:          [['./tests/e2e/login-test.js']],
+    home:           [['./tests/e2e/home-navegacion-test.js']],
+    hero:           [['./tests/e2e/hero_EPG-test.js']],
+    vod:            [['./tests/e2e/navegacion_vod-test.js']],
+    logout:         [['./tests/e2e/logout-test.js']],
+
+    // ── Auth (login + logout) ──────────────────────────────────────────────────
+    auth:           [['./tests/e2e/login-test.js', './tests/e2e/logout-test.js']],
+
+    // ── Navegación (home + hero + vod) ────────────────────────────────────────
+    navegacion:     [['./tests/e2e/home-navegacion-test.js', './tests/e2e/hero_EPG-test.js', './tests/e2e/navegacion_vod-test.js']],
+
+    // ── Login + contenido ─────────────────────────────────────────────────────
+    'login-home':   [['./tests/e2e/login-test.js', './tests/e2e/home-navegacion-test.js']],
+    'login-hero':   [['./tests/e2e/login-test.js', './tests/e2e/hero_EPG-test.js']],
+    'login-vod':    [['./tests/e2e/login-test.js', './tests/e2e/navegacion_vod-test.js']],
+    'login-logout': [['./tests/e2e/login-test.js', './tests/e2e/logout-test.js']],
+
+    // ── Flujo completo autenticado ─────────────────────────────────────────────
+    'login-home-logout': [['./tests/e2e/login-test.js', './tests/e2e/home-navegacion-test.js', './tests/e2e/logout-test.js']],
+    'login-hero-logout': [['./tests/e2e/login-test.js', './tests/e2e/hero_EPG-test.js', './tests/e2e/logout-test.js']],
+    'login-vod-logout':  [['./tests/e2e/login-test.js', './tests/e2e/navegacion_vod-test.js', './tests/e2e/logout-test.js']],
+
+    // ── Regresión completa ─────────────────────────────────────────────────────
+    all: [['./tests/e2e/login-test.js', './tests/e2e/home-navegacion-test.js', './tests/e2e/hero_EPG-test.js', './tests/e2e/navegacion_vod-test.js', './tests/e2e/logout-test.js']],
+  },
 
   // ─── Capabilities ───────────────────────────────────────────────────────────
   maxInstances: 1,
@@ -86,7 +128,7 @@ exports.config = {
       outputFileFormat: (options) => `results-${options.cid}.xml`
     }],
     ['allure', {
-      outputDir:        './reports/allure-results/',
+      outputDir:        ALLURE_OUT,
       disableWebdriverStepsReporting: true,
       disableWebdriverScreenshotsReporting: false,
     }]
@@ -106,7 +148,7 @@ exports.config = {
     const dirs = [
       path.join(__dirname, 'reports', 'screenshots'),
       path.join(__dirname, 'reports', 'junit'),
-      path.join(__dirname, 'reports', 'allure-results'),
+      path.join(__dirname, ALLURE_OUT),
     ]
     dirs.forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }) })
 
@@ -124,6 +166,23 @@ exports.config = {
     console.log('  [before] ✓ estado de pantalla reseteado al home')
   },
 
+  beforeEach: async function () {
+    // 1. Verificar que la app objetivo esté en primer plano y relanzarla si no lo está.
+    //    Defensivo: nunca rompe el test si falla la detección.
+    try {
+      const { ensureAppInForeground } = require('./utils/helpers')
+      await ensureAppInForeground()
+    } catch (_) {}
+
+    // 2. Cerrar el popup publicitario in-app si aparece antes de cada test.
+    //    El popup muestra "OMITIR" y "ABRIR" — siempre se tapea "OMITIR".
+    //    No falla si el popup no está presente.
+    try {
+      const { dismissPromoPopupIfVisible } = require('./utils/helpers')
+      await dismissPromoPopupIfVisible()
+    } catch (_) {}
+  },
+
   afterTest: async function (test, context, { error }) {
     // Adjuntar screenshot a Allure solo cuando falla un test
     if (error) {
@@ -135,6 +194,21 @@ exports.config = {
     }
   },
 
+  onComplete: async function () {
+    // Publicar reporte automáticamente al finalizar cualquier corrida (1 test o todos)
+    const { execSync } = require('child_process')
+    const path = require('path')
+    console.log('\n[onComplete] Publicando reporte en GitHub Pages...')
+    try {
+      execSync(`node "${path.join(__dirname, 'publish-report.js')}" "${ALLURE_OUT}"`, {
+        stdio: 'inherit',
+        timeout: 120000,
+      })
+    } catch (e) {
+      console.warn('[onComplete] No se pudo publicar el reporte:', e.message.split('\n')[0])
+    }
+  },
+
   onPrepare: async function () {
     if (!process.env.APP_PACKAGE) {
       console.warn('[WARN] APP_PACKAGE env var is not set')
@@ -142,6 +216,20 @@ exports.config = {
     if (!process.env.APP_ACTIVITY) {
       console.warn('[WARN] APP_ACTIVITY env var is not set')
     }
+
+    // Cada corrida usa su propia carpeta ALLURE_OUT con timestamp — nunca hay conflicto de archivos
+    const fs   = require('fs')
+    const path = require('path')
+    const resultsDir = path.join(__dirname, ALLURE_OUT)
+    fs.mkdirSync(resultsDir, { recursive: true })
+    console.log(`[onPrepare] allure output: ${ALLURE_OUT}`)
+    fs.writeFileSync(path.join(resultsDir, 'environment.properties'), [
+      'Platform=Android',
+      `Device=${process.env.DEVICE_NAME || '192.168.1.187:5555'}`,
+      `App_Package=${process.env.APP_PACKAGE || 'N/A'}`,
+      'Automation=Appium + WebDriverIO',
+    ].join('\n'))
+    console.log('[onPrepare] environment.properties escrito para Allure')
 
     // Verificar que la app esté instalada antes de lanzar la sesión
     const { execSync } = require('child_process')
